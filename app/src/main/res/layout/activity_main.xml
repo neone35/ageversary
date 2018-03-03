@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/whiteColor"
+        tools:context="com.amaslov.android.ageversary.MainActivity">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="185dp"
+            android:background="@drawable/main_gradient"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/iv_header_line"
+                android:layout_width="0dp"
+                android:layout_height="19dp"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_profile_holder"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/iv_profile_holder"
+                app:srcCompat="@drawable/white_line" />
+
+            <ImageView
+                android:id="@+id/iv_year_holder"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_profile_holder"
+                app:layout_constraintEnd_toStartOf="@+id/iv_profile_holder"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/iv_profile_holder"
+                app:srcCompat="@drawable/white_circle" />
+
+            <ImageView
+                android:id="@+id/iv_share_holder"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_profile_holder"
+                app:layout_constraintEnd_toEndOf="@+id/iv_header_line"
+                app:layout_constraintStart_toEndOf="@+id/iv_profile_holder"
+                app:layout_constraintTop_toTopOf="@+id/iv_profile_holder"
+                app:srcCompat="@drawable/selector_share" />
+
+            <ImageView
+                android:id="@+id/iv_profile_holder"
+                android:layout_width="85dp"
+                android:layout_height="85dp"
+                android:layout_marginBottom="64dp"
+                android:layout_marginTop="32dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/white_circle" />
+
+            <TextView
+                android:id="@+id/tv_profile_name"
+                style="@style/profileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="@+id/iv_profile_holder"
+                app:layout_constraintStart_toStartOf="@+id/iv_profile_holder"
+                app:layout_constraintTop_toBottomOf="@+id/iv_profile_holder"
+                android:text="Artur Maslov"
+                tools:text="Artur Maslov" />
+
+            <TextView
+                android:id="@+id/tv_profile_age"
+                style="@style/profileAge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:text="24yr 4mo"
+                app:layout_constraintEnd_toEndOf="@+id/tv_profile_name"
+                app:layout_constraintStart_toStartOf="@+id/tv_profile_name"
+                app:layout_constraintTop_toBottomOf="@+id/tv_profile_name" />
+
+            <TextView
+                android:id="@+id/tv_year_progress"
+                style="@style/yearProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="98%"
+                app:layout_constraintBottom_toBottomOf="@+id/iv_year_holder"
+                app:layout_constraintEnd_toEndOf="@+id/iv_year_holder"
+                app:layout_constraintStart_toStartOf="@+id/iv_year_holder"
+                app:layout_constraintTop_toTopOf="@+id/iv_year_holder" />
+
+            <TextView
+                android:id="@+id/tv_year_progress_label"
+                style="@style/yearProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:text="year"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="@+id/tv_year_progress"
+                app:layout_constraintStart_toStartOf="@+id/tv_year_progress"
+                app:layout_constraintTop_toBottomOf="@+id/tv_year_progress" />
+
+
+        </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>
+
+</layout>
+
+
