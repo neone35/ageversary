@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">AgeVersary</string>
+    <string name="app_name">ageversary</string>
+    <string name="percent">%</string>
 </resources>
