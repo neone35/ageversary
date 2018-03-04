@@ -126,7 +126,7 @@
                 seekarc:sweepAngle="300"
                 seekarc:enabled="false"
                 seekarc:touchInside="false"
-                seekarc:arcWidth="3dp"
+                seekarc:arcWidth="4dp"
                 seekarc:max="100"
                 seekarc:roundEdges="true"
                 seekarc:arcColor="@color/primaryDarkestColor"
