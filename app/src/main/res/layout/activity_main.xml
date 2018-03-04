@@ -60,7 +60,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/white_circle" />
+                app:srcCompat="@drawable/account_circle_holder" />
 
             <TextView
                 android:id="@+id/tv_profile_name"
