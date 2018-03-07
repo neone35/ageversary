@@ -2,4 +2,7 @@
     <string name="app_name">ageversary</string>
     <string name="app_name_caps">AgeVersary</string>
     <string name="percent">%</string>
+    <string name="no_name">No name</string>
+    <string name="default_age">00yr 0mo</string>
+    <string name="year_progress_label">year</string>
 </resources>

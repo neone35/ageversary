@@ -1,7 +1,10 @@
 package com.amaslov.android.ageversary;
 
+import android.accounts.Account;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,27 +13,28 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.TextView;
-
+import android.widget.Toast;
 import com.amaslov.android.ageversary.databinding.ActivityMainBinding;
-import com.google.android.gms.auth.api.Auth;
+import com.amaslov.android.ageversary.fragments.BirthdayDialogFragment;
+import com.amaslov.android.ageversary.utilities.CircleTransform;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
 import com.squareup.picasso.Picasso;
 import com.triggertrap.seekarc.SeekArc;
-
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int RC_SIGN_IN = 141;
     ActivityMainBinding mainBinding;
     GoogleSignInClient mGoogleSignInClient;
-    private static final int RC_SIGN_IN = 141;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,57 +42,88 @@ public class MainActivity extends AppCompatActivity {
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setActionBar();
         setYearProgress(mainBinding.saYearProgress, mainBinding.tvYearProgress);
-        setAnimations();
+        setAnimations(mainBinding.saYearProgress);
 
-        this.mainBinding.ivProfileHolder.setOnClickListener(new View.OnClickListener() {
+        // Profile sign in button
+        mainBinding.ivProfileHolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestEmail()
-                        .build();
-                mGoogleSignInClient = GoogleSignIn.getClient(MainActivity.this, gso);
                 signIn();
             }
         });
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-        }
-    }
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Log.d(getLocalClassName(), "handleSignInResult: " + account.getPhotoUrl());
-            Picasso.with(this)
-                    .load(account.getPhotoUrl())
-                    .resize(85, 85)
-                    .centerCrop()
-                    .into(mainBinding.ivProfileHolder);
-            // Signed in successfully, show authenticated UI.
-//            updateUI(account);
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w(getLocalClassName(), "signInResult:failed code=" + e.getStatusCode());
-//            updateUI(null);
-        }
+    protected void onStart() {
+        super.onStart();
+//        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+//        if (account != null)
+//            updateProfileUI(account);
     }
 
+    // Prompt to choose account
     private void signIn() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestProfile()
+                .requestScopes(new Scope(Scopes.PLUS_ME))
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(MainActivity.this, gso);
+
+        showBirthdayDialog();
+
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    private void setActionBar () {
+    private void showBirthdayDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        BirthdayDialogFragment birthdayDialogFragment = BirthdayDialogFragment.newInstance("Pick your birth date");
+        birthdayDialogFragment.show(fm, "fragment_edit_name");
+    }
+
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // Result from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                Log.d(getLocalClassName(), "handleSignInResult: " + account.getAccount());
+                updateProfileUI(account);
+            } catch (ApiException e) {
+                Log.w(getLocalClassName(), "signInResult:failed code=" + e.getStatusCode());
+                updateProfileUI(null);
+            }
+        }
+    }
+
+    private void updateProfileUI(GoogleSignInAccount account) {
+        if (account != null) {
+            // turn off login listener
+            mainBinding.ivProfileHolder.setOnClickListener(null);
+            Uri photoUrl = account.getPhotoUrl();
+            String displayName = account.getDisplayName();
+            // load profile photo into view
+            Picasso picasso = Picasso.with(this);
+            picasso.load(photoUrl)
+                    .placeholder(R.drawable.account_circle_holder)
+                    .fit()
+                    .centerCrop()
+                    .transform(new CircleTransform())
+                    .into(mainBinding.ivProfileHolder);
+            // set profile name into view
+            mainBinding.tvProfileName.setText(displayName);
+            // set birthday into view
+            // TODO: get answer from dialog fragment
+        } else {
+            Toast.makeText(this, "Failed to login. Try again", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setActionBar() {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setCustomView(R.layout.actionbar_custom);
     }
@@ -108,13 +143,12 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(percentFinal);
     }
 
-    private void setAnimations(){
-        View saYear = mainBinding.saYearProgress;
+    private void setAnimations(SeekArc sa) {
         Animation fadeIn = new AlphaAnimation(0, 1);
         fadeIn.setInterpolator(new AccelerateInterpolator());
         fadeIn.setStartOffset(500);
         fadeIn.setDuration(750);
         fadeIn.setRepeatMode(Animation.REVERSE);
-        saYear.setAnimation(fadeIn);
+        sa.setAnimation(fadeIn);
     }
 }
