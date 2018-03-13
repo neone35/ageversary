@@ -1,7 +1,10 @@
 package com.amaslov.android.ageversary;
 
 import android.accounts.Account;
+import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.support.v4.app.FragmentManager;
@@ -13,10 +16,11 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.amaslov.android.ageversary.databinding.ActivityMainBinding;
-import com.amaslov.android.ageversary.fragments.BirthdayDialogFragment;
+import com.amaslov.android.ageversary.fragments.DatePickerDialogFragment;
 import com.amaslov.android.ageversary.utilities.CircleTransform;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -30,21 +34,25 @@ import com.squareup.picasso.Picasso;
 import com.triggertrap.seekarc.SeekArc;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
-    private static final int RC_SIGN_IN = 141;
-    ActivityMainBinding mainBinding;
-    GoogleSignInClient mGoogleSignInClient;
+    private final String TAG = "MainActivity";
+    private final int RC_SIGN_IN = 141;
+    private ActivityMainBinding mainBinding;
+    private SharedPreferences ageSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        ageSharedPreferences = this.getSharedPreferences(
+                getString(R.string.age_preferences_key), Context.MODE_PRIVATE);
+
         setActionBar();
         setYearProgress(mainBinding.saYearProgress, mainBinding.tvYearProgress);
-        setAnimations(mainBinding.saYearProgress);
+        startAnimations(mainBinding.saYearProgress);
 
-        // Profile sign in button
+        // G+ profile sign in button
         mainBinding.ivProfileHolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -56,32 +64,29 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-//        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-//        if (account != null)
-//            updateProfileUI(account);
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        if (account != null)
+            updateProfileUI(account);
+
+        String defaultAge = getString(R.string.default_age);
+        String userAge = ageSharedPreferences.getString(getString(R.string.user_age_key), defaultAge);
+        if (userAge.equals(defaultAge)) {
+            showBirthdayDialog();
+        } else {
+            mainBinding.tvProfileAge.setText(userAge);
+        }
     }
 
     // Prompt to choose account
     private void signIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
                 .requestProfile()
-                .requestScopes(new Scope(Scopes.PLUS_ME))
                 .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(MainActivity.this, gso);
-
-        showBirthdayDialog();
+        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(MainActivity.this, gso);
 
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
-
-    private void showBirthdayDialog() {
-        FragmentManager fm = getSupportFragmentManager();
-        BirthdayDialogFragment birthdayDialogFragment = BirthdayDialogFragment.newInstance("Pick your birth date");
-        birthdayDialogFragment.show(fm, "fragment_edit_name");
-    }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -116,8 +121,6 @@ public class MainActivity extends AppCompatActivity {
                     .into(mainBinding.ivProfileHolder);
             // set profile name into view
             mainBinding.tvProfileName.setText(displayName);
-            // set birthday into view
-            // TODO: get answer from dialog fragment
         } else {
             Toast.makeText(this, "Failed to login. Try again", Toast.LENGTH_SHORT).show();
         }
@@ -143,12 +146,58 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(percentFinal);
     }
 
-    private void setAnimations(SeekArc sa) {
+    private void startAnimations(SeekArc sa) {
         Animation fadeIn = new AlphaAnimation(0, 1);
         fadeIn.setInterpolator(new AccelerateInterpolator());
         fadeIn.setStartOffset(500);
         fadeIn.setDuration(750);
         fadeIn.setRepeatMode(Animation.REVERSE);
         sa.setAnimation(fadeIn);
+    }
+
+    private void showBirthdayDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        DatePickerDialogFragment datePickerDialogFragment =
+                DatePickerDialogFragment.newInstance("Choose your birthday");
+        datePickerDialogFragment.show(fm, "birthdayPicker");
+    }
+
+    @Override
+    public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
+        year = datePicker.getYear();
+        monthOfYear = datePicker.getMonth();
+
+        // years and months between now and birth
+        // for tvProfileAge
+        int yearNow = Calendar.getInstance().get(Calendar.YEAR);
+        int monthNow = Calendar.getInstance().get(Calendar.MONTH);
+        int yearAge = yearNow - year;
+        int monthAge = monthNow + (12 - monthOfYear);
+        Log.d(TAG, "onDateSet: " + monthNow + " " + monthOfYear);
+        String userAgeYearsMonths = yearAge + "yr " + monthAge + "mo";
+
+        // seconds, minutes, hours, days between now and birth
+        Calendar birthDate = Calendar.getInstance();
+        birthDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        birthDate.set(Calendar.MONTH, monthOfYear);
+        birthDate.set(Calendar.YEAR, year);
+        Calendar today = Calendar.getInstance();
+        long diffBirthNow = today.getTimeInMillis() - birthDate.getTimeInMillis();
+        long seconds = diffBirthNow / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+        long months = days / 30;
+        // i need days, hours, minutes
+
+        // save time dimensions to sharedPreferences
+        ageSharedPreferences = this.getSharedPreferences(
+                getString(R.string.age_preferences_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = ageSharedPreferences.edit();
+        editor.putString(getString(R.string.user_age_key), userAgeYearsMonths);
+        editor.apply();
+
+        // update UI after choosing birth date
+        mainBinding.tvProfileAge.setText(userAgeYearsMonths);
     }
 }

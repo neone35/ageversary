@@ -34,4 +34,10 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="birthDate" parent="actionBarTitle">
+        <item name="android:textColor">@color/grayColor</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
 </resources>

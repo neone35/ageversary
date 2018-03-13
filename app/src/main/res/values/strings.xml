@@ -3,6 +3,11 @@
     <string name="app_name_caps">AgeVersary</string>
     <string name="percent">%</string>
     <string name="no_name">No name</string>
-    <string name="default_age">00yr 0mo</string>
+    <string name="default_age">00yr 00mo</string>
     <string name="year_progress_label">year</string>
+    <string name="choose_birth_date">Choose your birth date</string>
+    <string name="years_age_key">years_age</string>
+    <string name="months_age_key">months_age</string>
+    <string name="user_age_key">user_age</string>
+    <string name="age_preferences_key">age_preferences</string>
 </resources>
