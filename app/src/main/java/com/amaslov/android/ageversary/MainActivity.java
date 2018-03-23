@@ -19,9 +19,18 @@ import android.view.animation.Animation;
 import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.amaslov.android.ageversary.databinding.ActivityMainBinding;
 import com.amaslov.android.ageversary.fragments.DatePickerDialogFragment;
 import com.amaslov.android.ageversary.utilities.CircleTransform;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.login.Login;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -32,7 +41,14 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
 import com.squareup.picasso.Picasso;
 import com.triggertrap.seekarc.SeekArc;
+
+import java.util.Arrays;
 import java.util.Calendar;
+
+import com.facebook.FacebookSdk;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
@@ -40,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     private final int RC_SIGN_IN = 141;
     private ActivityMainBinding mainBinding;
     private SharedPreferences ageSharedPreferences;
+    private LoginButton loginButton;
+    private CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +70,55 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         setYearProgress(mainBinding.saYearProgress, mainBinding.tvYearProgress);
         startAnimations(mainBinding.saYearProgress);
 
+
         // G+ profile sign in button
         mainBinding.ivProfileHolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                signIn();
+//                googleSignIn();
+                loginButton = (LoginButton) view;
+                loginButton.setReadPermissions(Arrays.asList(
+                        "public_profile", "email", "user_birthday", "user_friends"));
+                callbackManager = CallbackManager.Factory.create();
+                // Callback registration
+                loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        // App code
+                        GraphRequest request = GraphRequest.newMeRequest(
+                                loginResult.getAccessToken(),
+                                new GraphRequest.GraphJSONObjectCallback() {
+                                    @Override
+                                    public void onCompleted(JSONObject object, GraphResponse response) {
+                                        Log.v("LoginActivity", response.toString());
+                                        // Application code
+                                        try {
+                                            String email = object.getString("email");
+                                            String birthday = object.getString("birthday"); // 01/31/1980 format
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                    }
+                                });
+                        Bundle parameters = new Bundle();
+                        parameters.putString("fields", "id,name,email,gender,birthday");
+                        request.setParameters(parameters);
+                        request.executeAsync();
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        // App code
+                        Log.v("LoginActivity", "cancel");
+                    }
+
+                    @Override
+                    public void onError(FacebookException exception) {
+                        // App code
+                        Log.v("LoginActivity", exception.getCause().toString());
+                    }
+                });
             }
         });
     }
@@ -78,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     }
 
     // Prompt to choose account
-    private void signIn() {
+    private void googleSignIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestProfile()
                 .build();

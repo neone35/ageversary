@@ -10,4 +10,6 @@
     <string name="months_age_key">months_age</string>
     <string name="user_age_key">user_age</string>
     <string name="age_preferences_key">age_preferences</string>
+    <string name="facebook_app_id">934823246677416</string>
+    <string name="fb_login_protocol_scheme">fb934823246677416</string>
 </resources>
