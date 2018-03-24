@@ -5,12 +5,16 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -23,25 +27,22 @@ import android.widget.Toast;
 import com.amaslov.android.ageversary.databinding.ActivityMainBinding;
 import com.amaslov.android.ageversary.fragments.DatePickerDialogFragment;
 import com.amaslov.android.ageversary.utilities.CircleTransform;
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.Profile;
 import com.facebook.login.Login;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.tasks.Task;
 import com.squareup.picasso.Picasso;
 import com.triggertrap.seekarc.SeekArc;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -69,19 +70,27 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         setActionBar();
         setYearProgress(mainBinding.saYearProgress, mainBinding.tvYearProgress);
         startAnimations(mainBinding.saYearProgress);
-
+        generateKeyHash();
 
         // G+ profile sign in button
         mainBinding.ivProfileHolder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                googleSignIn();
-                loginButton = (LoginButton) view;
+                fbLoginButtonClick();
+            }
+        });
+    }
+
+    private void fbLoginButtonClick() {
+        mainBinding.fbLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loginButton = mainBinding.fbLoginButton;
                 loginButton.setReadPermissions(Arrays.asList(
                         "public_profile", "email", "user_birthday", "user_friends"));
                 callbackManager = CallbackManager.Factory.create();
                 // Callback registration
-                loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+                LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
                     @Override
                     public void onSuccess(LoginResult loginResult) {
                         // App code
@@ -95,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                                         try {
                                             String email = object.getString("email");
                                             String birthday = object.getString("birthday"); // 01/31/1980 format
+                                            Log.d(TAG, "onCompleted: " + email);
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
@@ -121,72 +131,51 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 });
             }
         });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account != null)
-            updateProfileUI(account);
-
-        String defaultAge = getString(R.string.default_age);
-        String userAge = ageSharedPreferences.getString(getString(R.string.user_age_key), defaultAge);
-        if (userAge.equals(defaultAge)) {
-            showBirthdayDialog();
-        } else {
-            mainBinding.tvProfileAge.setText(userAge);
+        boolean loggedIn = AccessToken.getCurrentAccessToken() == null;
+        Log.d(TAG, "fbLoginButtonClick: " + loggedIn);
+        if (loggedIn) {
+            LoginManager.getInstance().logOut();
+            mainBinding.fbLoginButton.performClick();
         }
     }
 
-    // Prompt to choose account
-    private void googleSignIn() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestProfile()
-                .build();
-        GoogleSignInClient mGoogleSignInClient = GoogleSignIn.getClient(MainActivity.this, gso);
-
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // Result from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                Log.d(getLocalClassName(), "handleSignInResult: " + account.getAccount());
-                updateProfileUI(account);
-            } catch (ApiException e) {
-                Log.w(getLocalClassName(), "signInResult:failed code=" + e.getStatusCode());
-                updateProfileUI(null);
+    private void generateKeyHash() {
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "com.amaslov.android.ageversary",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
             }
+        } catch (PackageManager.NameNotFoundException e) {
+
+        } catch (NoSuchAlgorithmException e) {
+
         }
     }
 
-    private void updateProfileUI(GoogleSignInAccount account) {
-        if (account != null) {
-            // turn off login listener
-            mainBinding.ivProfileHolder.setOnClickListener(null);
-            Uri photoUrl = account.getPhotoUrl();
-            String displayName = account.getDisplayName();
-            // load profile photo into view
-            Picasso picasso = Picasso.with(this);
-            picasso.load(photoUrl)
-                    .placeholder(R.drawable.account_circle_holder)
-                    .fit()
-                    .centerCrop()
-                    .transform(new CircleTransform())
-                    .into(mainBinding.ivProfileHolder);
-            // set profile name into view
-            mainBinding.tvProfileName.setText(displayName);
-        } else {
-            Toast.makeText(this, "Failed to login. Try again", Toast.LENGTH_SHORT).show();
-        }
-    }
+//    private void updateProfileUI(GoogleSignInAccount account) {
+//        if (account != null) {
+//            // turn off login listener
+//            mainBinding.ivProfileHolder.setOnClickListener(null);
+//            Uri photoUrl = account.getPhotoUrl();
+//            String displayName = account.getDisplayName();
+//            // load profile photo into view
+//            Picasso picasso = Picasso.with(this);
+//            picasso.load(photoUrl)
+//                    .placeholder(R.drawable.account_circle_holder)
+//                    .fit()
+//                    .centerCrop()
+//                    .transform(new CircleTransform())
+//                    .into(mainBinding.ivProfileHolder);
+//            // set profile name into view
+//            mainBinding.tvProfileName.setText(displayName);
+//        } else {
+//            Toast.makeText(this, "Failed to login. Try again", Toast.LENGTH_SHORT).show();
+//        }
+//    }
 
     private void setActionBar() {
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);

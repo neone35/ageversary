@@ -24,21 +24,31 @@ android {
             url "https://jitpack.io"
         }
         google()
+        mavenCentral()
+        jcenter()
     }
     configurations.all {
         resolutionStrategy.force 'com.google.code.findbugs:jsr305:1.3.9'
     }
 }
 
+ext {
+    supportLibVersion = '27.1.0'
+    facebookVersion = '4.31.0'
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:27.1.0'
-    implementation 'com.android.support:support-v4:27.1.0'
+    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
+    implementation "com.android.support:cardview-v7:${supportLibVersion}"
+    implementation "com.android.support:customtabs:${supportLibVersion}"
+    implementation "com.android.support:support-v4:${supportLibVersion}"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.github.Triggertrap:SeekArc:v1.1'
-    compile 'com.google.android.gms:play-services-auth:11.8.0'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.google.apis:google-api-services-people:v1-rev4-1.22.0'
+    implementation 'com.github.Triggertrap:SeekArc:v1.1'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation "com.facebook.android:facebook-android-sdk:${facebookVersion}"
+    implementation "com.facebook.android:facebook-login:${facebookVersion}"
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
