@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.amaslov.android.ageversary.utilities;
+package com.github.neone35.ageversary.utilities;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;

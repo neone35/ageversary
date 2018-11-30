@@ -1,17 +1,14 @@
-package com.amaslov.android.ageversary.fragments;
+package com.github.neone35.ageversary.fragments;
 
-import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
 
 import java.util.Calendar;
+import java.util.Objects;
 
 
 public class DatePickerDialogFragment extends DialogFragment {
@@ -40,9 +37,12 @@ public class DatePickerDialogFragment extends DialogFragment {
         int day = c.get(Calendar.DAY_OF_MONTH);
         // Activity needs to implement this interface
         DatePickerDialog.OnDateSetListener listener = (DatePickerDialog.OnDateSetListener) getActivity();
-        DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), listener, year, month, day);
+        DatePickerDialog datePickerDialog = new DatePickerDialog(Objects.requireNonNull(getActivity()), listener, year, month, day);
 
-        String customTitle = getArguments().getString("title", "Choose a value");
+        String customTitle = null;
+        if (getArguments() != null) {
+            customTitle = getArguments().getString("title", "Choose a value");
+        }
         datePickerDialog.setTitle(customTitle);
         long timeNow = c.getTimeInMillis();
         long years126 = 4000000000000L;

@@ -7,7 +7,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.2.1'
         
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -19,7 +19,20 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     }
+}
+
+ext {
+    support_v = '28.0.0'
+    stetho_v = '1.5.0'
+    butterknife_v = '9.0.0-SNAPSHOT' // AndroidX compatible
+    retrofit_v = '2.4.0'
+    play_v = '16.0.0'
+    room_v = '1.1.1'
+    fb_v='4.38.1'
 }
 
 task clean(type: Delete) {

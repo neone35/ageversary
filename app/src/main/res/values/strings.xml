@@ -12,4 +12,5 @@
     <string name="age_preferences_key">age_preferences</string>
     <string name="facebook_app_id">934823246677416</string>
     <string name="fb_login_protocol_scheme">fb934823246677416</string>
+    <string name="app_logo_string">app logo</string>
 </resources>
