@@ -3,17 +3,26 @@ package com.github.neone35.ageversary;
 import android.app.ActionBar;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
+import android.net.Uri;
 import android.os.Bundle;
 
+import android.util.Base64;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.github.neone35.ageversary.fragments.DatePickerDialogFragment;
+import com.blankj.utilcode.util.TimeUtils;
+import com.blankj.utilcode.util.ToastUtils;
+import com.facebook.GraphResponse;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -23,14 +32,23 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.facebook.stetho.Stetho;
+import com.github.neone35.ageversary.utilities.CircleTransform;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
+import com.squareup.picasso.Picasso;
 import com.triggertrap.seekarc.SeekArc;
 
+import org.joda.time.Period;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Locale;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -38,7 +56,7 @@ import androidx.fragment.app.FragmentManager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
+public class MainActivity extends AppCompatActivity {
 
     private final int RC_SIGN_IN = 141;
     @BindView(R.id.iv_year_holder)
@@ -62,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     @BindView(R.id.constraintLayout)
     ConstraintLayout constraintLayout;
     private SharedPreferences ageSharedPreferences;
-    private LoginButton loginButton;
     private CallbackManager callbackManager;
 
     @Override
@@ -75,23 +92,19 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
         setYearProgress(saYearProgress, tvYearProgress);
         startAnimations(saYearProgress);
+        setUpListeners();
+    }
 
+    // needed for facebook login activity
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void setUpListeners() {
         // social profile sign in button
         ivProfileHolder.setOnClickListener(view -> fbLoginButtonClick());
-    }
-
-    private void setUpActivity() {
-        ButterKnife.bind(this);
-        Stetho.initializeWithDefaults(this);
-        Logger.addLogAdapter(new AndroidLogAdapter());
-        // set up action bar
-        if (getSupportActionBar() != null) {
-//            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-            getSupportActionBar().setCustomView(R.layout.actionbar_custom);
-        }
-    }
-
-    private void fbLoginButtonClick() {
         fbLoginButton.setOnClickListener(v -> {
             fbLoginButton.setReadPermissions(Arrays.asList(
                     "public_profile", "email", "user_birthday", "user_friends"));
@@ -106,18 +119,10 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                             (object, response) -> {
                                 Logger.v("LoginActivity", response.toString());
                                 // Application code
-                                try {
-                                    String email = object.getString("email");
-                                    String birthday = object.getString("birthday"); // 01/31/1980 format
-                                    Logger.d("onCompleted email: " + email);
-                                    Logger.d("onCompleted birthday: " + birthday);
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-
+                                updateProfileUI(response);
                             });
                     Bundle parameters = new Bundle();
-                    parameters.putString("fields", "id,name,email,gender,birthday");
+                    parameters.putString("fields", "id,name,email,gender,birthday,picture.type(large)");
                     request.setParameters(parameters);
                     request.executeAsync();
                 }
@@ -135,6 +140,36 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 }
             });
         });
+    }
+
+    private void setUpActivity() {
+        ButterKnife.bind(this);
+        Stetho.initializeWithDefaults(this);
+        Logger.addLogAdapter(new AndroidLogAdapter());
+        // set up action bar
+        if (getSupportActionBar() != null) {
+//            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+            getSupportActionBar().setCustomView(R.layout.actionbar_custom);
+        }
+    }
+
+//    private void generateKeyHash() {
+//        try {
+//            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
+//            for (Signature signature : info.signatures) {
+//                MessageDigest md = MessageDigest.getInstance("SHA");
+//                md.update(signature.toByteArray());
+//                String hashKey = new String(Base64.encode(md.digest(), 0));
+//                Logger.i("printHashKey() Hash Key: " + hashKey);
+//            }
+//        } catch (NoSuchAlgorithmException e) {
+//            Logger.e("printHashKey()", e);
+//        } catch (Exception e) {
+//            Logger.e("printHashKey()", e);
+//        }
+//    }
+
+    private void fbLoginButtonClick() {
         fbLoginButton.performClick();
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
@@ -145,26 +180,39 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         }
     }
 
-//    private void updateProfileUI(GoogleSignInAccount account) {
-//        if (account != null) {
-//            // turn off login listener
-//            mainBinding.ivProfileHolder.setOnClickListener(null);
-//            Uri photoUrl = account.getPhotoUrl();
-//            String displayName = account.getDisplayName();
-//            // load profile photo into view
-//            Picasso picasso = Picasso.with(this);
-//            picasso.load(photoUrl)
-//                    .placeholder(R.drawable.account_circle_holder)
-//                    .fit()
-//                    .centerCrop()
-//                    .transform(new CircleTransform())
-//                    .into(mainBinding.ivProfileHolder);
-//            // set profile name into view
-//            mainBinding.tvProfileName.setText(displayName);
-//        } else {
-//            Toast.makeText(this, "Failed to login. Try again", Toast.LENGTH_SHORT).show();
-//        }
-//    }
+    private void updateProfileUI(GraphResponse response) {
+        if (response != null) {
+            // turn off login listener
+//            ivProfileHolder.setOnClickListener(null);
+            String name;
+            String birthDate;
+            String photoUrl;
+            try {
+                JSONObject resObj = response.getJSONObject();
+                name = resObj.getString("name");
+                birthDate = resObj.getString("birthday"); // 01/31/1980 format
+                photoUrl = resObj.getJSONObject("picture").getJSONObject("data").getString("url");
+                // load profile photo into view
+                Picasso.get().load(photoUrl)
+                        .placeholder(R.drawable.account_circle_holder)
+                        .fit()
+                        .centerCrop()
+                        .transform(new CircleTransform())
+                        .into(ivProfileHolder);
+                // set profile name into view
+                tvProfileName.setText(name);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+                long birthMillis = TimeUtils.string2Millis(birthDate, dateFormat);
+                long nowMillis = System.currentTimeMillis();
+                Period period = new Period(birthMillis, nowMillis);
+                tvProfileAge.setText(period.getYears() + "y " + period.getMonths() + "m " + period.getDays() + "d");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            ToastUtils.showShort("Failed to login. Try again");
+        }
+    }
 
     private void setYearProgress(SeekArc sa, TextView tv) {
         final int DAYS_YEAR = 365;
@@ -188,51 +236,5 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         fadeIn.setDuration(750);
         fadeIn.setRepeatMode(Animation.REVERSE);
         sa.setAnimation(fadeIn);
-    }
-
-    private void showBirthdayDialog() {
-        FragmentManager fm = getSupportFragmentManager();
-        DatePickerDialogFragment datePickerDialogFragment =
-                DatePickerDialogFragment.newInstance("Choose your birthday");
-        datePickerDialogFragment.show(fm, "birthdayPicker");
-    }
-
-    @Override
-    public void onDateSet(DatePicker datePicker, int year, int monthOfYear, int dayOfMonth) {
-        year = datePicker.getYear();
-        monthOfYear = datePicker.getMonth();
-
-        // years and months between now and birth
-        // for tvProfileAge
-        int yearNow = Calendar.getInstance().get(Calendar.YEAR);
-        int monthNow = Calendar.getInstance().get(Calendar.MONTH);
-        int yearAge = yearNow - year;
-        int monthAge = monthNow + (12 - monthOfYear);
-        Logger.d("onDateSet: " + monthNow + " " + monthOfYear);
-        String userAgeYearsMonths = yearAge + "yr " + monthAge + "mo";
-
-        // seconds, minutes, hours, days between now and birth
-        Calendar birthDate = Calendar.getInstance();
-        birthDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        birthDate.set(Calendar.MONTH, monthOfYear);
-        birthDate.set(Calendar.YEAR, year);
-        Calendar today = Calendar.getInstance();
-        long diffBirthNow = today.getTimeInMillis() - birthDate.getTimeInMillis();
-        long seconds = diffBirthNow / 1000;
-        long minutes = seconds / 60;
-        long hours = minutes / 60;
-        long days = hours / 24;
-        long months = days / 30;
-        // i need days, hours, minutes
-
-        // save time dimensions to sharedPreferences
-        ageSharedPreferences = this.getSharedPreferences(
-                getString(R.string.age_preferences_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = ageSharedPreferences.edit();
-        editor.putString(getString(R.string.user_age_key), userAgeYearsMonths);
-        editor.apply();
-
-        // update UI after choosing birth date
-        tvProfileAge.setText(userAgeYearsMonths);
     }
 }
