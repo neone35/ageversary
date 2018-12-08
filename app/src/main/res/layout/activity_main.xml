@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:seekarc="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/whiteColor"
     tools:context="com.github.neone35.ageversary.MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/cl_header"
         android:layout_width="0dp"
         android:layout_height="185dp"
         android:background="@drawable/main_gradient"
@@ -152,7 +153,124 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/cl_header" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_days"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginRight="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cl_header">
+
+        <com.triggertrap.seekarc.SeekArc
+            android:id="@+id/sa_days_anniversary"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:layout_gravity="center"
+            android:padding="20dp"
+            seekarc:arcColor="@color/progress_gray"
+            seekarc:arcWidth="8dp"
+            seekarc:enabled="false"
+            seekarc:max="100"
+            seekarc:progress="70"
+            seekarc:progressColor="@color/primaryDarkColor"
+            seekarc:progressWidth="8dp"
+            seekarc:rotation="0"
+            seekarc:roundEdges="true"
+            seekarc:startAngle="0"
+            seekarc:sweepAngle="360"
+            seekarc:touchInside="true" />
+
+        <TextView
+            android:id="@+id/tv_days_anniv_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:text="ANNIV."
+            android:textAllCaps="true"
+            android:textColor="@color/primaryDarkestColor"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/tv_days_anniversary"
+            app:layout_constraintHorizontal_bias="0.7"
+            app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
+            app:layout_constraintTop_toTopOf="@+id/tv_days_anniversary" />
+
+        <TextView
+            android:id="@+id/tv_days_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="DAYS"
+            android:textAllCaps="true"
+            android:textColor="@color/primaryDarkestColor"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_days_to_go_label"
+            app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
+            app:layout_constraintTop_toTopOf="@+id/tv_days_anniv_label" />
+
+        <TextView
+            android:id="@+id/tv_days_to_go_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="TO GO"
+            android:textAllCaps="true"
+            android:textColor="@color/primaryDarkestColor"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_days_to_go"
+            app:layout_constraintEnd_toEndOf="@+id/tv_days_anniv_label" />
+
+        <TextView
+            android:id="@+id/tv_days_anniversary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="7500"
+            android:textColor="@color/primaryDarkestColor"
+            android:textSize="32sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_days"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:text="7376"
+            android:textColor="@color/primaryDarkestColor"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_days_label"
+            app:layout_constraintEnd_toEndOf="@+id/tv_days_anniv_label"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_days_label"
+            app:layout_constraintTop_toTopOf="@+id/tv_days_label" />
+
+        <TextView
+            android:id="@+id/tv_days_to_go"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="124"
+            android:textColor="@color/primaryDarkestColor"
+            android:textSize="32sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/tv_days_anniversary" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -14,12 +13,12 @@ import android.widget.TextView;
 
 import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.facebook.GraphResponse;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -31,6 +30,7 @@ import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 import com.triggertrap.seekarc.SeekArc;
 
+import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,8 +69,14 @@ public class MainActivity extends AppCompatActivity {
     TextView tvYearProgressLabel;
     @BindView(R.id.sa_year_progress)
     SeekArc saYearProgress;
-    @BindView(R.id.constraintLayout)
+    @BindView(R.id.cl_header)
     ConstraintLayout constraintLayout;
+    @BindView(R.id.tv_days_anniversary)
+    TextView tvDaysAnniversary;
+    @BindView(R.id.tv_days_to_go)
+    TextView tvToGo;
+    @BindView(R.id.tv_days)
+    TextView tvDays;
     private CallbackManager callbackManager;
     private PrefUtils mUserPrefs;
 
@@ -78,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         setUpActivity();
         SharedPreferences userSharedPreferences = this.getSharedPreferences(
                 PrefUtils.PREF_FILE_NAME, Context.MODE_PRIVATE);
@@ -264,6 +271,9 @@ public class MainActivity extends AppCompatActivity {
                 String userAge = getString(R.string.age_holder, period.getYears(), period.getMonths(), period.getDays());
                 // set user age into view
                 tvProfileAge.setText(userAge);
+                // duration in ms between two instants
+                Duration dur = new Duration(birthMillis, nowMillis);
+                tvDays.setText(String.valueOf(dur.getStandardDays()));
                 saveUserInfoToPrefs(userName, userAge, userPhotoUrl);
             } catch (JSONException e) {
                 e.printStackTrace();
