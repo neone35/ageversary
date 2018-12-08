@@ -1,24 +1,16 @@
 package com.github.neone35.ageversary;
 
-import android.app.ActionBar;
-import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.net.Uri;
 import android.os.Bundle;
 
-import android.util.Base64;
+import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.blankj.utilcode.util.TimeUtils;
 import com.blankj.utilcode.util.ToastUtils;
@@ -32,7 +24,8 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.facebook.stetho.Stetho;
-import com.github.neone35.ageversary.utilities.CircleTransform;
+import com.github.neone35.ageversary.utils.CircleTransform;
+import com.github.neone35.ageversary.utils.PrefUtils;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
@@ -42,23 +35,22 @@ import org.joda.time.Period;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.FragmentManager;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int RC_SIGN_IN = 141;
+    private static final String KEY_USER_NAME = "user_name";
+    private static final String KEY_USER_AGE = "user_age";
+    private static final String KEY_USER_PICTURE = "user_picture";
     @BindView(R.id.iv_year_holder)
     ImageView ivYearHolder;
     @BindView(R.id.iv_share_holder)
@@ -79,19 +71,21 @@ public class MainActivity extends AppCompatActivity {
     SeekArc saYearProgress;
     @BindView(R.id.constraintLayout)
     ConstraintLayout constraintLayout;
-    private SharedPreferences ageSharedPreferences;
     private CallbackManager callbackManager;
+    private PrefUtils mUserPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpActivity();
-        ageSharedPreferences = this.getSharedPreferences(
-                getString(R.string.age_preferences_key), Context.MODE_PRIVATE);
+        SharedPreferences userSharedPreferences = this.getSharedPreferences(
+                PrefUtils.PREF_FILE_NAME, Context.MODE_PRIVATE);
+        mUserPrefs = PrefUtils.getInstance(userSharedPreferences);
 
         setYearProgress(saYearProgress, tvYearProgress);
         startAnimations(saYearProgress);
+        loadUserInfoFromPrefs();
         setUpListeners();
     }
 
@@ -104,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void setUpListeners() {
         // social profile sign in button
-        ivProfileHolder.setOnClickListener(view -> fbLoginButtonClick());
+        ivProfileHolder.setOnClickListener(view -> fbLogInOff());
         fbLoginButton.setOnClickListener(v -> {
             fbLoginButton.setReadPermissions(Arrays.asList(
                     "public_profile", "email", "user_birthday", "user_friends"));
@@ -119,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                             (object, response) -> {
                                 Logger.v("LoginActivity", response.toString());
                                 // Application code
+                                fbLoginButton.setVisibility(View.GONE);
                                 updateProfileUI(response);
                             });
                     Bundle parameters = new Bundle();
@@ -148,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         Logger.addLogAdapter(new AndroidLogAdapter());
         // set up action bar
         if (getSupportActionBar() != null) {
-//            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+            getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
             getSupportActionBar().setCustomView(R.layout.actionbar_custom);
         }
     }
@@ -169,43 +164,107 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    }
 
-    private void fbLoginButtonClick() {
+    private void fbLogInOff() {
         fbLoginButton.performClick();
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
-        Logger.d("fbLoginButtonClick: " + isLoggedIn);
+        Logger.d("fbLogInOff: " + isLoggedIn);
         if (isLoggedIn) {
             LoginManager.getInstance().logOut();
-            fbLoginButton.performClick();
+            // show facebook login button
+            fbLoginButton.setVisibility(View.VISIBLE);
+            // erase & load empty user preferences
+            mUserPrefs.clear();
+            loadUserInfoFromPrefs();
         }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // restore user info on switch
+//        loadUserInfoFromPrefs();
+    }
+
+    // load user info from preferences
+    private void loadUserInfoFromPrefs() {
+        if (mUserPrefs != null) {
+            // load user prefs if they exist
+            if (!mUserPrefs.getString(KEY_USER_AGE).isEmpty())
+                tvProfileAge.setText(mUserPrefs.getString(KEY_USER_AGE));
+            else {
+                tvProfileAge.setText(getString(R.string.default_age));
+            }
+            if (!mUserPrefs.getString(KEY_USER_NAME).isEmpty())
+                tvProfileName.setText(mUserPrefs.getString(KEY_USER_NAME));
+            else {
+                tvProfileName.setText(getString(R.string.no_name));
+            }
+            if (!mUserPrefs.getString(KEY_USER_PICTURE).isEmpty())
+                loadUserPicture(mUserPrefs.getString(KEY_USER_PICTURE));
+            else {
+                loadUserPicture(String.valueOf(R.drawable.account_circle_holder));
+            }
+
+            // show facebook login button only if user info is empty
+            if (mUserPrefs.getString(KEY_USER_AGE).isEmpty() &&
+                    mUserPrefs.getString(KEY_USER_NAME).isEmpty() &&
+                    mUserPrefs.getString(KEY_USER_PICTURE).isEmpty()) {
+                fbLoginButton.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    // save info to preferences
+    private void saveUserInfoToPrefs(String name, String age, String pictureUrl) {
+        mUserPrefs.clear();
+        if (tvProfileAge.getText() != getString(R.string.default_age)) {
+            if (mUserPrefs.getString(KEY_USER_AGE).isEmpty())
+                mUserPrefs.putString(KEY_USER_AGE, age);
+        }
+        if (tvProfileName.getText() != getString(R.string.no_name)) {
+            if (mUserPrefs.getString(KEY_USER_NAME).isEmpty())
+                mUserPrefs.putString(KEY_USER_NAME, name);
+        }
+        if (ivProfileHolder.getDrawable() != null) {
+            if (mUserPrefs.getString(KEY_USER_PICTURE).isEmpty())
+                mUserPrefs.putString(KEY_USER_PICTURE, pictureUrl);
+        }
+    }
+
+    // load profile photo into view
+    private void loadUserPicture(String pictureUrl) {
+        Picasso.get().load(pictureUrl)
+                .placeholder(R.drawable.account_circle_holder)
+                .fit()
+                .centerCrop()
+                .transform(new CircleTransform())
+                .into(ivProfileHolder);
     }
 
     private void updateProfileUI(GraphResponse response) {
         if (response != null) {
             // turn off login listener
 //            ivProfileHolder.setOnClickListener(null);
-            String name;
-            String birthDate;
-            String photoUrl;
+            String userName;
+            String userBirthDate;
+            String userPhotoUrl;
             try {
                 JSONObject resObj = response.getJSONObject();
-                name = resObj.getString("name");
-                birthDate = resObj.getString("birthday"); // 01/31/1980 format
-                photoUrl = resObj.getJSONObject("picture").getJSONObject("data").getString("url");
-                // load profile photo into view
-                Picasso.get().load(photoUrl)
-                        .placeholder(R.drawable.account_circle_holder)
-                        .fit()
-                        .centerCrop()
-                        .transform(new CircleTransform())
-                        .into(ivProfileHolder);
+                userName = resObj.getString("name");
+                userBirthDate = resObj.getString("birthday"); // 01/31/1980 format
+                userPhotoUrl = resObj.getJSONObject("picture").getJSONObject("data").getString("url");
+                loadUserPicture(userPhotoUrl);
                 // set profile name into view
-                tvProfileName.setText(name);
+                tvProfileName.setText(userName);
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
-                long birthMillis = TimeUtils.string2Millis(birthDate, dateFormat);
+                long birthMillis = TimeUtils.string2Millis(userBirthDate, dateFormat);
                 long nowMillis = System.currentTimeMillis();
                 Period period = new Period(birthMillis, nowMillis);
-                tvProfileAge.setText(period.getYears() + "y " + period.getMonths() + "m " + period.getDays() + "d");
+                String userAge = getString(R.string.age_holder, period.getYears(), period.getMonths(), period.getDays());
+                // set user age into view
+                tvProfileAge.setText(userAge);
+                saveUserInfoToPrefs(userName, userAge, userPhotoUrl);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
