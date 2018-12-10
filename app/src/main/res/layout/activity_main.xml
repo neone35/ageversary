@@ -9,135 +9,9 @@
     android:background="@color/whiteColor"
     tools:context="com.github.neone35.ageversary.MainActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/cl_header"
-        android:layout_width="0dp"
-        android:layout_height="185dp"
-        android:background="@drawable/main_gradient"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/iv_header_line"
-            android:layout_width="0dp"
-            android:layout_height="19dp"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_profile_holder"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/iv_profile_holder"
-            app:srcCompat="@drawable/white_line" />
-
-        <ImageView
-            android:id="@+id/iv_year_holder"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_profile_holder"
-            app:layout_constraintEnd_toStartOf="@+id/iv_profile_holder"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/iv_profile_holder"
-            app:srcCompat="@drawable/white_circle" />
-
-        <ImageView
-            android:id="@+id/iv_share_holder"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
-            android:clickable="true"
-            android:focusable="true"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_profile_holder"
-            app:layout_constraintEnd_toEndOf="@+id/iv_header_line"
-            app:layout_constraintStart_toEndOf="@+id/iv_profile_holder"
-            app:layout_constraintTop_toTopOf="@+id/iv_profile_holder"
-            app:srcCompat="@drawable/selector_share" />
-
-        <ImageView
-            android:id="@+id/iv_profile_holder"
-            android:layout_width="85dp"
-            android:layout_height="85dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="64dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/account_circle_holder" />
-
-        <TextView
-            android:id="@+id/tv_profile_name"
-            style="@style/profileName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/no_name"
-            app:layout_constraintEnd_toEndOf="@+id/iv_profile_holder"
-            app:layout_constraintStart_toStartOf="@+id/iv_profile_holder"
-            app:layout_constraintTop_toBottomOf="@+id/iv_profile_holder"
-            tools:text="Artur Maslov" />
-
-        <TextView
-            android:id="@+id/tv_profile_age"
-            style="@style/profileAge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="@string/default_age"
-            app:layout_constraintEnd_toEndOf="@+id/tv_profile_name"
-            app:layout_constraintStart_toStartOf="@+id/tv_profile_name"
-            app:layout_constraintTop_toBottomOf="@+id/tv_profile_name"
-            tools:text="24yr 4mo" />
-
-        <TextView
-            android:id="@+id/tv_year_progress"
-            style="@style/yearProgress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="24dp"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_year_holder"
-            app:layout_constraintEnd_toEndOf="@+id/iv_year_holder"
-            app:layout_constraintStart_toStartOf="@+id/iv_year_holder"
-            app:layout_constraintTop_toTopOf="@+id/iv_year_holder"
-            tools:text="98%" />
-
-        <TextView
-            android:id="@+id/tv_year_progress_label"
-            style="@style/yearProgress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:text="@string/year_progress_label"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="@+id/tv_year_progress"
-            app:layout_constraintStart_toStartOf="@+id/tv_year_progress"
-            app:layout_constraintTop_toBottomOf="@+id/tv_year_progress" />
-
-        <com.triggertrap.seekarc.SeekArc
-            android:id="@+id/sa_year_progress"
-            android:layout_width="66dp"
-            android:layout_height="66dp"
-            android:layout_gravity="center"
-            android:padding="13dp"
-            app:layout_constraintBottom_toBottomOf="@+id/iv_year_holder"
-            app:layout_constraintEnd_toEndOf="@+id/iv_year_holder"
-            app:layout_constraintStart_toStartOf="@+id/iv_year_holder"
-            app:layout_constraintTop_toTopOf="@+id/iv_year_holder"
-            seekarc:arcColor="@color/primaryDarkestColor"
-            seekarc:arcWidth="4dp"
-            seekarc:enabled="false"
-            seekarc:max="100"
-            seekarc:progress="0"
-            seekarc:rotation="0"
-            seekarc:roundEdges="true"
-            seekarc:startAngle="0"
-            seekarc:sweepAngle="300"
-            seekarc:touchInside="false" />
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <include
+        android:id="@+id/inc_header"
+        layout="@layout/activity_main_header" />
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/fb_login_button"
@@ -153,10 +27,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cl_header" />
+        app:layout_constraintTop_toBottomOf="@+id/inc_header" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/cl_days"
+    <include
+        android:id="@+id/inc_days"
+        layout="@layout/activity_main_days"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -166,111 +41,7 @@
         android:layout_marginRight="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cl_header">
-
-        <com.triggertrap.seekarc.SeekArc
-            android:id="@+id/sa_days_anniversary"
-            android:layout_width="88dp"
-            android:layout_height="88dp"
-            android:layout_gravity="center"
-            android:padding="20dp"
-            seekarc:arcColor="@color/progress_gray"
-            seekarc:arcWidth="8dp"
-            seekarc:enabled="false"
-            seekarc:max="100"
-            seekarc:progress="70"
-            seekarc:progressColor="@color/primaryDarkColor"
-            seekarc:progressWidth="8dp"
-            seekarc:rotation="0"
-            seekarc:roundEdges="true"
-            seekarc:startAngle="0"
-            seekarc:sweepAngle="360"
-            seekarc:touchInside="true" />
-
-        <TextView
-            android:id="@+id/tv_days_anniv_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:text="ANNIV."
-            android:textAllCaps="true"
-            android:textColor="@color/primaryDarkestColor"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@+id/tv_days_anniversary"
-            app:layout_constraintHorizontal_bias="0.7"
-            app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
-            app:layout_constraintTop_toTopOf="@+id/tv_days_anniversary" />
-
-        <TextView
-            android:id="@+id/tv_days_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="DAYS"
-            android:textAllCaps="true"
-            android:textColor="@color/primaryDarkestColor"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_days_to_go_label"
-            app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
-            app:layout_constraintTop_toTopOf="@+id/tv_days_anniv_label" />
-
-        <TextView
-            android:id="@+id/tv_days_to_go_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="TO GO"
-            android:textAllCaps="true"
-            android:textColor="@color/primaryDarkestColor"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_days_to_go"
-            app:layout_constraintEnd_toEndOf="@+id/tv_days_anniv_label" />
-
-        <TextView
-            android:id="@+id/tv_days_anniversary"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="7500"
-            android:textColor="@color/primaryDarkestColor"
-            android:textSize="32sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tv_days"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="7376"
-            android:textColor="@color/primaryDarkestColor"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_days_label"
-            app:layout_constraintEnd_toEndOf="@+id/tv_days_anniv_label"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/tv_days_label"
-            app:layout_constraintTop_toTopOf="@+id/tv_days_label" />
-
-        <TextView
-            android:id="@+id/tv_days_to_go"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="124"
-            android:textColor="@color/primaryDarkestColor"
-            android:textSize="32sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/tv_days_anniversary" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@+id/inc_header"></include>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

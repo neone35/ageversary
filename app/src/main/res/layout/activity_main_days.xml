@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:seekarc="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl_days"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="24dp"
+    android:layout_marginLeft="24dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="24dp"
+    android:layout_marginRight="24dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent">
+
+    <com.triggertrap.seekarc.SeekArc
+        android:id="@+id/sa_days_anniversary"
+        android:layout_width="88dp"
+        android:layout_height="88dp"
+        android:layout_gravity="center"
+        android:padding="20dp"
+        seekarc:arcColor="@color/progress_gray"
+        seekarc:arcWidth="8dp"
+        seekarc:enabled="false"
+        seekarc:max="100"
+        seekarc:progress="70"
+        seekarc:progressColor="@color/primaryDarkColor"
+        seekarc:progressWidth="8dp"
+        seekarc:rotation="0"
+        seekarc:roundEdges="true"
+        seekarc:startAngle="0"
+        seekarc:sweepAngle="360"
+        seekarc:touchInside="true" />
+
+    <TextView
+        android:id="@+id/tv_days_anniv_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:text="@string/anniv"
+        android:textAllCaps="true"
+        android:textColor="@color/primaryDarkestColor"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/tv_days_anniversary"
+        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/tv_days_anniversary" />
+
+    <TextView
+        android:id="@+id/tv_days_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:text="@string/days"
+        android:textAllCaps="true"
+        android:textColor="@color/primaryDarkestColor"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/sa_days_anniversary"
+        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/sa_days_anniversary" />
+
+    <TextView
+        android:id="@+id/tv_days_to_go_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/to_go"
+        android:textAllCaps="true"
+        android:textColor="@color/primaryDarkestColor"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_days_to_go"
+        app:layout_constraintEnd_toEndOf="@+id/tv_days_anniv_label" />
+
+    <TextView
+        android:id="@+id/tv_days_anniversary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000"
+        android:textSize="32sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="7500" />
+
+    <TextView
+        android:id="@+id/tv_days"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:textColor="@color/primaryDarkestColor"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_days_label"
+        app:layout_constraintStart_toEndOf="@+id/tv_days_label"
+        app:layout_constraintTop_toTopOf="@+id/tv_days_label"
+        tools:text="7376" />
+
+    <TextView
+        android:id="@+id/tv_days_to_go"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#000"
+        android:textSize="32sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/tv_days_anniversary"
+        tools:text="124" />
+
+    <TextView
+        android:id="@+id/tv_days_percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:textColor="#000"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/sa_days_anniversary"
+        app:layout_constraintStart_toStartOf="@+id/sa_days_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/sa_days_anniversary"
+        tools:text="51%" />
+
+    <TextView
+        android:id="@+id/tv_days_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@+id/tv_days_percent"
+        app:layout_constraintStart_toStartOf="@+id/tv_days_percent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_days_percent"
+        tools:text="12.18" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

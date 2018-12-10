@@ -42,14 +42,13 @@ import java.util.Locale;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String KEY_USER_NAME = "user_name";
-    private static final String KEY_USER_AGE = "user_age";
+    private static final String KEY_USER_BIRTH_DATE = "user_birth_date";
     private static final String KEY_USER_PICTURE = "user_picture";
     @BindView(R.id.iv_year_holder)
     ImageView ivYearHolder;
@@ -69,16 +68,17 @@ public class MainActivity extends AppCompatActivity {
     TextView tvYearProgressLabel;
     @BindView(R.id.sa_year_progress)
     SeekArc saYearProgress;
-    @BindView(R.id.cl_header)
-    ConstraintLayout constraintLayout;
     @BindView(R.id.tv_days_anniversary)
     TextView tvDaysAnniversary;
     @BindView(R.id.tv_days_to_go)
-    TextView tvToGo;
+    TextView tvDaysToGo;
     @BindView(R.id.tv_days)
     TextView tvDays;
     private CallbackManager callbackManager;
     private PrefUtils mUserPrefs;
+    private boolean mIsLoggedIn;
+    private long mBirthMillis;
+    private long mNowMillis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setUpActivity();
+        mNowMillis = System.currentTimeMillis();
         SharedPreferences userSharedPreferences = this.getSharedPreferences(
                 PrefUtils.PREF_FILE_NAME, Context.MODE_PRIVATE);
         mUserPrefs = PrefUtils.getInstance(userSharedPreferences);
@@ -94,13 +95,60 @@ public class MainActivity extends AppCompatActivity {
         startAnimations(saYearProgress);
         loadUserInfoFromPrefs();
         setUpListeners();
+        // if user is logged off & no preferences are set
+        if (!mIsLoggedIn && mUserPrefs.getString(KEY_USER_PICTURE).isEmpty()) {
+            blinkAnim(ivProfileHolder);
+            showAgeWidgets(false);
+        } else {
+            // set global birthMillis
+            Logger.d(mUserPrefs.getString(KEY_USER_BIRTH_DATE));
+            getUserAge(mUserPrefs.getString(KEY_USER_BIRTH_DATE));
+            // find ms interval between birth & now
+            Duration dur = new Duration(mBirthMillis, mNowMillis);
+            long daysAge = dur.getStandardDays();
+            setupAgeWidgets(daysAge);
+            Logger.d(mNowMillis);
+            Logger.d(mBirthMillis);
+
+            int nextDaysAnniv = (int) roundUp(daysAge, 100);
+            tvDaysAnniversary.setText(String.valueOf(nextDaysAnniv));
+            tvDaysToGo.setText(String.valueOf(nextDaysAnniv - daysAge));
+        }
     }
 
-    // needed for facebook login activity
+    private void setupAgeWidgets(long daysAge) {
+        // duration in ms between two instants
+        tvDays.setText(String.valueOf(daysAge));
+    }
+
+    // finds next i number dividable by v number
+    double roundUp(double i, int v) {
+        return Math.ceil(i / v) * v;
+    }
+
+    private void showAgeWidgets(boolean show) {
+        View incDays = findViewById(R.id.inc_days);
+        if (!show) {
+            incDays.setVisibility(View.GONE);
+        } else {
+            incDays.setVisibility(View.VISIBLE);
+        }
+    }
+
+    // needed for facebook 3rd party login activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void blinkAnim(View view) {
+        Animation anim = new AlphaAnimation(0.7f, 1.0f);
+        anim.setDuration(1000); // You can manage the blinking time with this parameter
+        anim.setStartOffset(20);
+        anim.setRepeatMode(Animation.REVERSE);
+        anim.setRepeatCount(Animation.INFINITE);
+        view.startAnimation(anim);
     }
 
     private void setUpListeners() {
@@ -122,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
                                 // Application code
                                 fbLoginButton.setVisibility(View.GONE);
                                 updateProfileUI(response);
+                                ivProfileHolder.getAnimation().cancel();
+                                showAgeWidgets(true);
                             });
                     Bundle parameters = new Bundle();
                     parameters.putString("fields", "id,name,email,gender,birthday,picture.type(large)");
@@ -174,15 +224,18 @@ public class MainActivity extends AppCompatActivity {
     private void fbLogInOff() {
         fbLoginButton.performClick();
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
-        Logger.d("fbLogInOff: " + isLoggedIn);
-        if (isLoggedIn) {
+        mIsLoggedIn = accessToken != null && !accessToken.isExpired();
+        Logger.d("fbLogInOff: " + mIsLoggedIn);
+        if (mIsLoggedIn) {
             LoginManager.getInstance().logOut();
             // show facebook login button
             fbLoginButton.setVisibility(View.VISIBLE);
             // erase & load empty user preferences
             mUserPrefs.clear();
             loadUserInfoFromPrefs();
+            // enable blinking again (logger off)
+            blinkAnim(ivProfileHolder);
+            showAgeWidgets(false);
         }
     }
 
@@ -197,8 +250,8 @@ public class MainActivity extends AppCompatActivity {
     private void loadUserInfoFromPrefs() {
         if (mUserPrefs != null) {
             // load user prefs if they exist
-            if (!mUserPrefs.getString(KEY_USER_AGE).isEmpty())
-                tvProfileAge.setText(mUserPrefs.getString(KEY_USER_AGE));
+            if (!mUserPrefs.getString(KEY_USER_BIRTH_DATE).isEmpty())
+                tvProfileAge.setText(getUserAge(mUserPrefs.getString(KEY_USER_BIRTH_DATE)));
             else {
                 tvProfileAge.setText(getString(R.string.default_age));
             }
@@ -214,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // show facebook login button only if user info is empty
-            if (mUserPrefs.getString(KEY_USER_AGE).isEmpty() &&
+            if (mUserPrefs.getString(KEY_USER_BIRTH_DATE).isEmpty() &&
                     mUserPrefs.getString(KEY_USER_NAME).isEmpty() &&
                     mUserPrefs.getString(KEY_USER_PICTURE).isEmpty()) {
                 fbLoginButton.setVisibility(View.VISIBLE);
@@ -223,11 +276,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // save info to preferences
-    private void saveUserInfoToPrefs(String name, String age, String pictureUrl) {
+    private void saveUserInfoToPrefs(String name, String birthDate, String pictureUrl) {
         mUserPrefs.clear();
         if (tvProfileAge.getText() != getString(R.string.default_age)) {
-            if (mUserPrefs.getString(KEY_USER_AGE).isEmpty())
-                mUserPrefs.putString(KEY_USER_AGE, age);
+            if (mUserPrefs.getString(KEY_USER_BIRTH_DATE).isEmpty())
+                mUserPrefs.putString(KEY_USER_BIRTH_DATE, birthDate);
         }
         if (tvProfileName.getText() != getString(R.string.no_name)) {
             if (mUserPrefs.getString(KEY_USER_NAME).isEmpty())
@@ -261,26 +314,29 @@ public class MainActivity extends AppCompatActivity {
                 userName = resObj.getString("name");
                 userBirthDate = resObj.getString("birthday"); // 01/31/1980 format
                 userPhotoUrl = resObj.getJSONObject("picture").getJSONObject("data").getString("url");
+
+                // load user picture
                 loadUserPicture(userPhotoUrl);
                 // set profile name into view
                 tvProfileName.setText(userName);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
-                long birthMillis = TimeUtils.string2Millis(userBirthDate, dateFormat);
-                long nowMillis = System.currentTimeMillis();
-                Period period = new Period(birthMillis, nowMillis);
-                String userAge = getString(R.string.age_holder, period.getYears(), period.getMonths(), period.getDays());
-                // set user age into view
+                // find & set user age into view
+                String userAge = getUserAge(userBirthDate);
                 tvProfileAge.setText(userAge);
-                // duration in ms between two instants
-                Duration dur = new Duration(birthMillis, nowMillis);
-                tvDays.setText(String.valueOf(dur.getStandardDays()));
-                saveUserInfoToPrefs(userName, userAge, userPhotoUrl);
+                // save set user info to prefs file
+                saveUserInfoToPrefs(userName, userBirthDate, userPhotoUrl);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
             ToastUtils.showShort("Failed to login. Try again");
         }
+    }
+
+    private String getUserAge(String userBirthDate) { // 01/31/1980 format
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+        mBirthMillis = TimeUtils.string2Millis(userBirthDate, dateFormat);
+        Period period = new Period(mBirthMillis, mNowMillis);
+        return getString(R.string.age_holder, period.getYears(), period.getMonths(), period.getDays());
     }
 
     private void setYearProgress(SeekArc sa, TextView tv) {
