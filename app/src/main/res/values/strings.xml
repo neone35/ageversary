@@ -13,6 +13,7 @@
     <string name="fb_login_protocol_scheme">fb934823246677416</string>
     <string name="app_logo_string">app logo</string>
     <string name="age_holder"><b>%1$d</b>y <b>%2$d</b>m <b>%3$d</b>d</string>
+    <string name="percent_holder">%1$d%%</string>
     <string name="to_go">TO GO</string>
     <string name="days">DAYS</string>
     <string name="anniv">ANNIV.</string>

@@ -25,16 +25,19 @@ import com.facebook.login.widget.LoginButton;
 import com.facebook.stetho.Stetho;
 import com.github.neone35.ageversary.utils.CircleTransform;
 import com.github.neone35.ageversary.utils.PrefUtils;
+import com.google.errorprone.annotations.FormatString;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 import com.triggertrap.seekarc.SeekArc;
 
 import org.joda.time.Duration;
+import org.joda.time.MutableDateTime;
 import org.joda.time.Period;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -64,8 +67,6 @@ public class MainActivity extends AppCompatActivity {
     TextView tvProfileAge;
     @BindView(R.id.tv_year_progress)
     TextView tvYearProgress;
-    @BindView(R.id.tv_year_progress_label)
-    TextView tvYearProgressLabel;
     @BindView(R.id.sa_year_progress)
     SeekArc saYearProgress;
     @BindView(R.id.tv_days_anniversary)
@@ -74,6 +75,12 @@ public class MainActivity extends AppCompatActivity {
     TextView tvDaysToGo;
     @BindView(R.id.tv_days)
     TextView tvDays;
+    @BindView(R.id.tv_days_percent)
+    TextView tvDaysPercent;
+    @BindView(R.id.tv_days_date)
+    TextView tvDaysDate;
+    @BindView(R.id.sa_days_anniversary)
+    SeekArc saDaysAnniversary;
     private CallbackManager callbackManager;
     private PrefUtils mUserPrefs;
     private boolean mIsLoggedIn;
@@ -101,29 +108,45 @@ public class MainActivity extends AppCompatActivity {
             showAgeWidgets(false);
         } else {
             // set global birthMillis
-            Logger.d(mUserPrefs.getString(KEY_USER_BIRTH_DATE));
             getUserAge(mUserPrefs.getString(KEY_USER_BIRTH_DATE));
             // find ms interval between birth & now
-            Duration dur = new Duration(mBirthMillis, mNowMillis);
-            long daysAge = dur.getStandardDays();
+            Duration msDuration = new Duration(mBirthMillis, mNowMillis);
+            int daysAge = (int) msDuration.getStandardDays();
             setupAgeWidgets(daysAge);
-            Logger.d(mNowMillis);
-            Logger.d(mBirthMillis);
-
-            int nextDaysAnniv = (int) roundUp(daysAge, 100);
-            tvDaysAnniversary.setText(String.valueOf(nextDaysAnniv));
-            tvDaysToGo.setText(String.valueOf(nextDaysAnniv - daysAge));
         }
     }
 
     private void setupAgeWidgets(long daysAge) {
-        // duration in ms between two instants
+        setupDaysWidget(daysAge);
+    }
+
+    private void setupDaysWidget(long daysAge) {
+        // set current days age
         tvDays.setText(String.valueOf(daysAge));
+        // find next anniversary & how far it is
+        int nextDaysAnniv = (int) roundUp(daysAge, 100);
+        tvDaysAnniversary.setText(String.valueOf(nextDaysAnniv));
+        int daysToNextAnniv = nextDaysAnniv - (int) daysAge;
+        tvDaysToGo.setText(String.valueOf(daysToNextAnniv));
+        // find percentage between two anniveraries
+        int percentOfDayAnniv = 100 - (nextDaysAnniv - (int) daysAge);
+        tvDaysPercent.setText(getString(R.string.percent_holder, percentOfDayAnniv));
+        saDaysAnniversary.setProgress(percentOfDayAnniv);
+        // find next anniversary date in format month.day
+        MutableDateTime annivDateTime = new MutableDateTime(mNowMillis);
+        annivDateTime.addDays(daysToNextAnniv);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd", Locale.getDefault());
+        tvDaysDate.setText(TimeUtils.millis2String(annivDateTime.getMillis(), dateFormat));
     }
 
     // finds next i number dividable by v number
     double roundUp(double i, int v) {
         return Math.ceil(i / v) * v;
+    }
+
+    // finds previous i number dividable by v number
+    double roundDown(double i, int v) {
+        return Math.floor(i / v) * v;
     }
 
     private void showAgeWidgets(boolean show) {
