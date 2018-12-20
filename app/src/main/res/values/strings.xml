@@ -14,12 +14,12 @@
     <string name="app_logo_string">app logo</string>
     <string name="age_holder"><b>%1$d</b>y <b>%2$d</b>m <b>%3$d</b>d</string>
     <string name="percent_holder">%1$d%%</string>
-    <string name="next_at">NEXT AT</string>
+    <string name="next_at">NEXT</string>
     <string name="days">days</string>
-    <string name="anniv">ANNIVERSARY</string>
+    <string name="anniv">ANNIV</string>
     <string name="app_header_horizontal_line">app header horizontal line</string>
     <string name="background_for_year_progress">background for year progress</string>
     <string name="background_for_share_button">background for share button</string>
     <string name="user_profile_photo">user profile photo</string>
-    <string name="currently">currently</string>
+    <string name="currently">current</string>
 </resources>

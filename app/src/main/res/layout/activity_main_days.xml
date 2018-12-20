@@ -40,28 +40,30 @@
         android:id="@+id/tv_days_anniv_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/anniv"
         android:textAllCaps="true"
         android:textColor="@color/primaryDarkestColor"
         android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/tv_days_anniversary"
-        app:layout_constraintHorizontal_bias="0.15"
-        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
+        app:layout_constraintStart_toStartOf="@+id/tv_days_current_label"
         app:layout_constraintTop_toTopOf="@+id/tv_days_anniversary" />
 
     <TextView
         android:id="@+id/tv_days_current_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
         android:text="@string/currently"
         android:textAllCaps="true"
         android:textColor="@color/primaryDarkestColor"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/tv_days_next_at_label"
-        app:layout_constraintEnd_toEndOf="@+id/tv_days_anniv_label"
+        app:layout_constraintEnd_toStartOf="@+id/tv_days"
+        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintStart_toStartOf="@+id/iv_days_time"
         app:layout_constraintTop_toBottomOf="@+id/tv_days_anniv_label" />
 
     <TextView
@@ -87,7 +89,7 @@
         android:textColor="@color/primaryDarkestColor"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/tv_days_anniv_label" />
+        app:layout_constraintStart_toStartOf="@+id/tv_days_current_label" />
 
     <TextView
         android:id="@+id/tv_days_anniversary"
@@ -132,5 +134,32 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:text="12.18" />
+
+    <ImageView
+        android:id="@+id/iv_days_bullseye"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_days_anniv_label"
+        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/tv_days_anniv_label"
+        app:srcCompat="@drawable/icon_bullseye_green" />
+
+    <ImageView
+        android:id="@+id/iv_days_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_days_next_at_label"
+        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/tv_days_next_at_label"
+        app:srcCompat="@drawable/icon_next_green" />
+
+    <ImageView
+        android:id="@+id/iv_days_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_days_current_label"
+        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/tv_days_current_label"
+        app:srcCompat="@drawable/icon_time_green" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
