@@ -71,8 +71,6 @@ public class MainActivity extends AppCompatActivity {
     SeekArc saYearProgress;
     @BindView(R.id.tv_days_anniversary)
     TextView tvDaysAnniversary;
-    @BindView(R.id.tv_days_to_go)
-    TextView tvDaysToGo;
     @BindView(R.id.tv_days)
     TextView tvDays;
     @BindView(R.id.tv_days_percent)
@@ -127,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         int nextDaysAnniv = (int) roundUp(daysAge, 100);
         tvDaysAnniversary.setText(String.valueOf(nextDaysAnniv));
         int daysToNextAnniv = nextDaysAnniv - (int) daysAge;
-        tvDaysToGo.setText(String.valueOf(daysToNextAnniv));
+//        tvDaysToGo.setText(String.valueOf(daysToNextAnniv));
         // find percentage between two anniveraries
         int percentOfDayAnniv = 100 - (nextDaysAnniv - (int) daysAge);
         tvDaysPercent.setText(getString(R.string.percent_holder, percentOfDayAnniv));
