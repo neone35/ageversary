@@ -11,4 +11,5 @@
     <color name="secondaryTextColor">#000000</color>
     <color name="whiteColor">#ffffff</color>
     <color name="grayColor">#484848</color>
+    <color name="yellowColor">#FBC02D</color>
 </resources>

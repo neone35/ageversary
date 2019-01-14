@@ -22,4 +22,8 @@
     <string name="background_for_share_button">background for share button</string>
     <string name="user_profile_photo">user profile photo</string>
     <string name="currently">current</string>
+    <string name="hours">hours</string>
+    <string name="anniversary_icon">Anniversary icon</string>
+    <string name="next_anniversary_date_icon">next anniversary date icon</string>
+    <string name="current_dimension_icon">current dimension icon</string>
 </resources>

@@ -25,7 +25,6 @@ import com.facebook.login.widget.LoginButton;
 import com.facebook.stetho.Stetho;
 import com.github.neone35.ageversary.utils.CircleTransform;
 import com.github.neone35.ageversary.utils.PrefUtils;
-import com.google.errorprone.annotations.FormatString;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
@@ -37,7 +36,8 @@ import org.joda.time.Period;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -79,6 +79,16 @@ public class MainActivity extends AppCompatActivity {
     TextView tvDaysDate;
     @BindView(R.id.sa_days_anniversary)
     SeekArc saDaysAnniversary;
+    @BindView(R.id.sa_hours_anniversary)
+    SeekArc saHoursAnniversary;
+    @BindView(R.id.tv_hours_anniversary)
+    TextView tvHoursAnniversary;
+    @BindView(R.id.tv_hours)
+    TextView tvHours;
+    @BindView(R.id.tv_hours_percent)
+    TextView tvHoursPercent;
+    @BindView(R.id.tv_hours_date)
+    TextView tvHoursDate;
     private CallbackManager callbackManager;
     private PrefUtils mUserPrefs;
     private boolean mIsLoggedIn;
@@ -110,24 +120,47 @@ public class MainActivity extends AppCompatActivity {
             // find ms interval between birth & now
             Duration msDuration = new Duration(mBirthMillis, mNowMillis);
             int daysAge = (int) msDuration.getStandardDays();
-            setupAgeWidgets(daysAge);
+            int hoursAge = (int) msDuration.getStandardHours();
+            int minutesAge = (int) msDuration.getStandardMinutes();
+            setupAgeWidgets(daysAge, hoursAge, minutesAge);
         }
     }
 
-    private void setupAgeWidgets(long daysAge) {
+    private void setupAgeWidgets(long daysAge, long hoursAge, long minutesAge) {
         setupDaysWidget(daysAge);
+        setupHoursWidget(hoursAge);
+    }
+
+    private void setupHoursWidget(long hoursAge) {
+        int annivEvery = 1000;
+        // set current hours age
+        tvHours.setText(NumberFormat.getInstance().format(hoursAge));
+        // find next anniversary & how far it is
+        int nextHoursAnniv = (int) roundUp(hoursAge, annivEvery);
+        tvHoursAnniversary.setText(NumberFormat.getInstance().format(nextHoursAnniv));
+        int hoursToNextAnniv = nextHoursAnniv - (int) hoursAge;
+        Logger.d(hoursToNextAnniv);
+        // find percentage between two anniveraries
+        int percentOfHoursAnniv = hoursToNextAnniv * 100 / annivEvery;
+        tvHoursPercent.setText(getString(R.string.percent_holder, percentOfHoursAnniv));
+        saHoursAnniversary.setProgress(percentOfHoursAnniv);
+        // find next anniversary date in format month.day
+        MutableDateTime annivDateTime = new MutableDateTime(mNowMillis);
+        annivDateTime.addHours(hoursToNextAnniv);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd", Locale.getDefault());
+        tvHoursDate.setText(TimeUtils.millis2String(annivDateTime.getMillis(), dateFormat));
     }
 
     private void setupDaysWidget(long daysAge) {
+        int annivEvery = 100;
         // set current days age
-        tvDays.setText(String.valueOf(daysAge));
+        tvDays.setText(NumberFormat.getInstance().format(daysAge));
         // find next anniversary & how far it is
-        int nextDaysAnniv = (int) roundUp(daysAge, 100);
-        tvDaysAnniversary.setText(String.valueOf(nextDaysAnniv));
+        int nextDaysAnniv = (int) roundUp(daysAge, annivEvery);
+        tvDaysAnniversary.setText(NumberFormat.getInstance().format(nextDaysAnniv));
         int daysToNextAnniv = nextDaysAnniv - (int) daysAge;
-//        tvDaysToGo.setText(String.valueOf(daysToNextAnniv));
         // find percentage between two anniveraries
-        int percentOfDayAnniv = 100 - (nextDaysAnniv - (int) daysAge);
+        int percentOfDayAnniv = annivEvery - daysToNextAnniv;
         tvDaysPercent.setText(getString(R.string.percent_holder, percentOfDayAnniv));
         saDaysAnniversary.setProgress(percentOfDayAnniv);
         // find next anniversary date in format month.day
