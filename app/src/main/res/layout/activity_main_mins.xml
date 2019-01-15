@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:seekarc="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/cl_days"
-    android:layout_marginStart="16dp"
-    android:layout_marginLeft="16dp"
+    android:id="@+id/cl_mins"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/bg_rounded"
-    android:paddingEnd="4dp"
-    android:paddingStart="4dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginLeft="16dp"
     android:layout_marginTop="16dp"
     android:layout_marginEnd="24dp"
     android:layout_marginRight="24dp"
-    app:layout_constraintEnd_toEndOf="parent"
+    android:background="@drawable/bg_rounded"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
     android:paddingRight="4dp"
+    app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent">
 
     <com.triggertrap.seekarc.SeekArc
-        android:id="@+id/sa_days_anniversary"
+        android:id="@+id/sa_mins_anniversary"
         android:layout_width="88dp"
         android:layout_height="88dp"
         android:layout_gravity="center"
@@ -32,7 +32,7 @@
         seekarc:enabled="false"
         seekarc:max="100"
         seekarc:progress="70"
-        seekarc:progressColor="@color/primaryDarkColor"
+        seekarc:progressColor="@color/pinkColor"
         seekarc:progressWidth="8dp"
         seekarc:rotation="0"
         seekarc:roundEdges="true"
@@ -41,7 +41,7 @@
         seekarc:touchInside="true" />
 
     <TextView
-        android:id="@+id/tv_days_next_at_label"
+        android:id="@+id/tv_mins_next_at_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -49,11 +49,11 @@
         android:textAllCaps="true"
         android:textColor="@color/primaryTextColor"
         android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="@+id/tv_days_current_label"
-        app:layout_constraintTop_toTopOf="@+id/tv_days_anniversary" />
+        app:layout_constraintStart_toStartOf="@+id/tv_mins_current_label"
+        app:layout_constraintTop_toTopOf="@+id/tv_mins_anniversary" />
 
     <TextView
-        android:id="@+id/tv_days_current_label"
+        android:id="@+id/tv_mins_current_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -62,25 +62,25 @@
         android:textAllCaps="true"
         android:textColor="@color/primaryTextColor"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_days_anniv_label"
-        app:layout_constraintStart_toEndOf="@+id/iv_days_time"
-        app:layout_constraintTop_toBottomOf="@+id/tv_days_next_at_label" />
+        app:layout_constraintBottom_toTopOf="@+id/tv_mins_anniv_label"
+        app:layout_constraintStart_toEndOf="@+id/iv_mins_time"
+        app:layout_constraintTop_toBottomOf="@+id/tv_mins_next_at_label" />
 
     <TextView
-        android:id="@+id/tv_days_label"
+        android:id="@+id/tv_mins_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/days"
-        android:textColor="@color/primaryDarkColor"
+        android:text="@string/mins"
+        android:textColor="@color/pinkColor"
         android:textSize="14sp"
-        app:layout_constraintBottom_toBottomOf="@+id/sa_days_anniversary"
-        app:layout_constraintEnd_toEndOf="@+id/tv_days_percent"
-        app:layout_constraintStart_toStartOf="@+id/tv_days_percent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_days_percent"
+        app:layout_constraintBottom_toBottomOf="@+id/sa_mins_anniversary"
+        app:layout_constraintEnd_toEndOf="@+id/tv_mins_percent"
+        app:layout_constraintStart_toStartOf="@+id/tv_mins_percent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_mins_percent"
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:id="@+id/tv_days_anniv_label"
+        android:id="@+id/tv_mins_anniv_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -89,80 +89,81 @@
         android:textColor="@color/primaryTextColor"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/tv_days_current_label" />
+        app:layout_constraintStart_toStartOf="@+id/tv_mins_current_label" />
 
     <TextView
-        android:id="@+id/tv_days_anniversary"
+        android:id="@+id/tv_mins_anniversary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#000"
         android:textSize="26sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="7500" />
+        tools:text="9,600,000" />
 
     <TextView
-        android:id="@+id/tv_days"
+        android:id="@+id/tv_mins"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/primaryDarkColor"
+        android:textColor="@color/pinkColor"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_days_current_label"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_mins_current_label"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_days_current_label"
-        tools:text="7376" />
+        app:layout_constraintTop_toTopOf="@+id/tv_mins_current_label"
+        tools:text="9,542,332" />
 
     <TextView
-        android:id="@+id/tv_days_percent"
+        android:id="@+id/tv_mins_percent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:textColor="#000"
         android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="@+id/sa_days_anniversary"
-        app:layout_constraintStart_toStartOf="@+id/sa_days_anniversary"
-        app:layout_constraintTop_toTopOf="@+id/sa_days_anniversary"
+        app:layout_constraintEnd_toEndOf="@+id/sa_mins_anniversary"
+        app:layout_constraintStart_toStartOf="@+id/sa_mins_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/sa_mins_anniversary"
         tools:text="51%" />
 
     <TextView
-        android:id="@+id/tv_days_date"
+        android:id="@+id/tv_mins_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#000"
-        android:textSize="26sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_mins_anniv_label"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="12.18" />
+        app:layout_constraintTop_toTopOf="@+id/tv_mins_anniv_label"
+        tools:text="01.18 10:15" />
 
     <ImageView
-        android:id="@+id/iv_days_bullseye"
+        android:id="@+id/iv_mins_bullseye"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_days_next_at_label"
-        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
-        app:layout_constraintTop_toTopOf="@+id/tv_days_next_at_label"
         android:contentDescription="@string/anniversary_icon"
-        app:srcCompat="@drawable/icon_bullseye_green" />
+        app:layout_constraintBottom_toBottomOf="@+id/tv_mins_next_at_label"
+        app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/tv_mins_next_at_label"
+        app:srcCompat="@drawable/icon_bullseye_pink" />
 
     <ImageView
-        android:id="@+id/iv_days_next"
+        android:id="@+id/iv_mins_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_days_anniv_label"
-        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
-        app:layout_constraintTop_toTopOf="@+id/tv_days_anniv_label"
         android:contentDescription="@string/next_anniversary_date_icon"
-        app:srcCompat="@drawable/icon_next_green" />
+        app:layout_constraintBottom_toBottomOf="@+id/tv_mins_anniv_label"
+        app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/tv_mins_anniv_label"
+        app:srcCompat="@drawable/icon_next_pink" />
 
     <ImageView
-        android:id="@+id/iv_days_time"
+        android:id="@+id/iv_mins_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_days_current_label"
-        app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
-        app:layout_constraintTop_toTopOf="@+id/tv_days_current_label"
         android:contentDescription="@string/current_dimension_icon"
-        app:srcCompat="@drawable/icon_time_green" />
+        app:layout_constraintBottom_toBottomOf="@+id/tv_mins_current_label"
+        app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/tv_mins_current_label"
+        app:srcCompat="@drawable/icon_time_pink" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

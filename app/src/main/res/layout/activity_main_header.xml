@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cl_header"
     android:layout_width="match_parent"
-    android:layout_height="185dp"
+    android:layout_height="165dp"
     android:background="@drawable/main_gradient"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
@@ -50,7 +50,7 @@
         android:id="@+id/iv_profile_holder"
         android:layout_width="85dp"
         android:layout_height="85dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="64dp"
         android:contentDescription="@string/user_profile_photo"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -82,7 +82,7 @@
         app:layout_constraintEnd_toEndOf="@+id/tv_profile_name"
         app:layout_constraintStart_toStartOf="@+id/tv_profile_name"
         app:layout_constraintTop_toBottomOf="@+id/tv_profile_name"
-        tools:text="24yr 4mo" />
+        tools:text="24y 4m 3d" />
 
     <TextView
         android:id="@+id/tv_year_progress"
@@ -122,15 +122,16 @@
         app:layout_constraintEnd_toEndOf="@+id/iv_year_holder"
         app:layout_constraintStart_toStartOf="@+id/iv_year_holder"
         app:layout_constraintTop_toTopOf="@+id/iv_year_holder"
-        seekarc:arcColor="@color/primaryDarkestColor"
+        seekarc:arcColor="@color/progress_gray"
         seekarc:arcWidth="4dp"
+        seekarc:progress="70"
         seekarc:enabled="false"
         seekarc:max="100"
-        seekarc:progress="0"
+        seekarc:progressColor="@color/primaryDarkestColor"
         seekarc:rotation="0"
         seekarc:roundEdges="true"
         seekarc:startAngle="0"
-        seekarc:sweepAngle="300"
+        seekarc:sweepAngle="360"
         seekarc:touchInside="false" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.blankj.utilcode.util.TimeUtils;
@@ -36,7 +37,6 @@ import org.joda.time.Period;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -89,6 +89,18 @@ public class MainActivity extends AppCompatActivity {
     TextView tvHoursPercent;
     @BindView(R.id.tv_hours_date)
     TextView tvHoursDate;
+    @BindView(R.id.sv_widgets)
+    ScrollView svWidgets;
+    @BindView(R.id.sa_mins_anniversary)
+    SeekArc saMinsAnniversary;
+    @BindView(R.id.tv_mins_anniversary)
+    TextView tvMinsAnniversary;
+    @BindView(R.id.tv_mins)
+    TextView tvMins;
+    @BindView(R.id.tv_mins_percent)
+    TextView tvMinsPercent;
+    @BindView(R.id.tv_mins_date)
+    TextView tvMinsDate;
     private CallbackManager callbackManager;
     private PrefUtils mUserPrefs;
     private boolean mIsLoggedIn;
@@ -121,14 +133,34 @@ public class MainActivity extends AppCompatActivity {
             Duration msDuration = new Duration(mBirthMillis, mNowMillis);
             int daysAge = (int) msDuration.getStandardDays();
             int hoursAge = (int) msDuration.getStandardHours();
-            int minutesAge = (int) msDuration.getStandardMinutes();
-            setupAgeWidgets(daysAge, hoursAge, minutesAge);
+            int minsAge = (int) msDuration.getStandardMinutes();
+            setupAgeWidgets(daysAge, hoursAge, minsAge);
         }
     }
 
-    private void setupAgeWidgets(long daysAge, long hoursAge, long minutesAge) {
+    private void setupAgeWidgets(long daysAge, long hoursAge, long minsAge) {
         setupDaysWidget(daysAge);
         setupHoursWidget(hoursAge);
+        setupMinsWidget(minsAge);
+    }
+
+    private void setupMinsWidget(long minsAge) {
+        int annivEvery = 100000;
+        // set current mins age
+        tvMins.setText(NumberFormat.getInstance().format(minsAge));
+        // find next anniversary & how far it is
+        int nextMinsAnniv = (int) roundUp(minsAge, annivEvery);
+        tvMinsAnniversary.setText(NumberFormat.getInstance().format(nextMinsAnniv));
+        int minsToNextAnniv = nextMinsAnniv - (int) minsAge;
+        // find percentage between two anniveraries
+        int percentOfMinsAnniv = 100 - (minsToNextAnniv * 100 / annivEvery);
+        tvMinsPercent.setText(getString(R.string.percent_holder, percentOfMinsAnniv));
+        saMinsAnniversary.setProgress(percentOfMinsAnniv);
+        // find next anniversary date in format month.day hour:mins
+        MutableDateTime annivDateTime = new MutableDateTime(mNowMillis);
+        annivDateTime.addMinutes(minsToNextAnniv);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd HH:mm", Locale.getDefault());
+        tvMinsDate.setText(TimeUtils.millis2String(annivDateTime.getMillis(), dateFormat));
     }
 
     private void setupHoursWidget(long hoursAge) {
@@ -139,15 +171,14 @@ public class MainActivity extends AppCompatActivity {
         int nextHoursAnniv = (int) roundUp(hoursAge, annivEvery);
         tvHoursAnniversary.setText(NumberFormat.getInstance().format(nextHoursAnniv));
         int hoursToNextAnniv = nextHoursAnniv - (int) hoursAge;
-        Logger.d(hoursToNextAnniv);
         // find percentage between two anniveraries
-        int percentOfHoursAnniv = hoursToNextAnniv * 100 / annivEvery;
+        int percentOfHoursAnniv = 100 - (hoursToNextAnniv * 100 / annivEvery);
         tvHoursPercent.setText(getString(R.string.percent_holder, percentOfHoursAnniv));
         saHoursAnniversary.setProgress(percentOfHoursAnniv);
-        // find next anniversary date in format month.day
+        // find next anniversary date in format month.day hour:00
         MutableDateTime annivDateTime = new MutableDateTime(mNowMillis);
         annivDateTime.addHours(hoursToNextAnniv);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd HH:00", Locale.getDefault());
         tvHoursDate.setText(TimeUtils.millis2String(annivDateTime.getMillis(), dateFormat));
     }
 
@@ -181,11 +212,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showAgeWidgets(boolean show) {
-        View incDays = findViewById(R.id.inc_days);
+//        View incDays = findViewById(R.id.inc_days);
         if (!show) {
-            incDays.setVisibility(View.GONE);
+            svWidgets.setVisibility(View.GONE);
         } else {
-            incDays.setVisibility(View.VISIBLE);
+            svWidgets.setVisibility(View.VISIBLE);
         }
     }
 
@@ -399,9 +430,9 @@ public class MainActivity extends AppCompatActivity {
         int currentDayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
         int percentOfYear = 100 * currentDayOfYear / DAYS_YEAR;
         if (currentDayOfYear > ANGLE_MAX) {
-            sa.setSweepAngle(360);
+            sa.setProgress(100);
         } else {
-            sa.setSweepAngle(currentDayOfYear);
+            sa.setProgress(currentDayOfYear * 100 / DAYS_YEAR);
         }
         String percentFinal =
                 String.valueOf(percentOfYear) + getResources().getString(R.string.percent);

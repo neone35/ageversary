@@ -24,6 +24,9 @@
         android:layout_height="88dp"
         android:layout_gravity="center"
         android:padding="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         seekarc:arcColor="@color/progress_gray"
         seekarc:arcWidth="8dp"
         seekarc:enabled="false"
@@ -38,16 +41,16 @@
         seekarc:touchInside="true" />
 
     <TextView
-        android:id="@+id/tv_hours_anniv_label"
+        android:id="@+id/tv_hours_next_at_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/anniv"
+        android:text="@string/next_at"
         android:textAllCaps="true"
         android:textColor="@color/primaryTextColor"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="@+id/tv_hours_current_label"
-        app:layout_constraintTop_toTopOf="@+id/tv_hours_anniversary" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_hours_current_label"
@@ -55,17 +58,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:text="@string/currently"
         android:textAllCaps="true"
         android:textColor="@color/primaryTextColor"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/tv_hours_next_at_label"
-        app:layout_constraintEnd_toStartOf="@+id/tv_hours"
-        app:layout_constraintHorizontal_bias="0.25"
-        app:layout_constraintStart_toStartOf="@+id/iv_hours_time"
-        app:layout_constraintTop_toBottomOf="@+id/tv_hours_anniv_label" />
+        app:layout_constraintBottom_toTopOf="@+id/tv_hours_anniv_label"
+        app:layout_constraintStart_toEndOf="@+id/iv_hours_time"
+        app:layout_constraintTop_toBottomOf="@+id/tv_hours_next_at_label" />
 
     <TextView
         android:id="@+id/tv_hours_label"
@@ -81,11 +80,11 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:id="@+id/tv_hours_next_at_label"
+        android:id="@+id/tv_hours_anniv_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/next_at"
+        android:text="@string/anniv"
         android:textAllCaps="true"
         android:textColor="@color/primaryTextColor"
         android:textSize="16sp"
@@ -100,7 +99,7 @@
         android:textSize="26sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="7500" />
+        tools:text="223000" />
 
     <TextView
         android:id="@+id/tv_hours"
@@ -112,7 +111,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/tv_hours_current_label"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tv_hours_current_label"
-        tools:text="7376" />
+        tools:text="223150" />
 
     <TextView
         android:id="@+id/tv_hours_percent"
@@ -131,19 +130,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="#000"
-        android:textSize="26sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_hours_anniv_label"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="12.18" />
+        app:layout_constraintTop_toTopOf="@+id/tv_hours_anniv_label"
+        tools:text="01.18 07:00" />
 
     <ImageView
         android:id="@+id/iv_hours_bullseye"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/anniversary_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_hours_anniv_label"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_hours_next_at_label"
         app:layout_constraintStart_toEndOf="@+id/sa_hours_anniversary"
-        app:layout_constraintTop_toTopOf="@+id/tv_hours_anniv_label"
+        app:layout_constraintTop_toTopOf="@+id/tv_hours_next_at_label"
         app:srcCompat="@drawable/icon_bullseye_yellow" />
 
     <ImageView
@@ -151,9 +151,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/next_anniversary_date_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_hours_next_at_label"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_hours_anniv_label"
         app:layout_constraintStart_toEndOf="@+id/sa_hours_anniversary"
-        app:layout_constraintTop_toTopOf="@+id/tv_hours_next_at_label"
+        app:layout_constraintTop_toTopOf="@+id/tv_hours_anniv_label"
         app:srcCompat="@drawable/icon_next_yellow" />
 
     <ImageView
