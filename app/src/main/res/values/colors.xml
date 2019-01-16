@@ -11,6 +11,6 @@
     <color name="secondaryTextColor">#000000</color>
     <color name="whiteColor">#ffffff</color>
     <color name="grayColor">#484848</color>
-    <color name="yellowColor">#FBC02D</color>
+    <color name="yellowColor">#fab505</color>
     <color name="pinkColor">#F00A6B</color>
 </resources>

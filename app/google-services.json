@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "974405427959",
+    "firebase_url": "https://ageversary-1520196559946.firebaseio.com",
+    "project_id": "ageversary-1520196559946",
+    "storage_bucket": "ageversary-1520196559946.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974405427959:android:1272407f032371d3",
+        "android_client_info": {
+          "package_name": "com.github.neone35.ageversary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974405427959-gnf3kd3bndo0s3ukqourdlucf9knehj6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.neone35.ageversary",
+            "certificate_hash": "caf1a7498f4f0b0f909af065a49220aa249c8668"
+          }
+        },
+        {
+          "client_id": "974405427959-aem57ca1ptpj9he73tuk48ill890i53a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDd7E-6Q6krVoh7dazuiu9s4gyk7k1bNFw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974405427959-aem57ca1ptpj9he73tuk48ill890i53a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

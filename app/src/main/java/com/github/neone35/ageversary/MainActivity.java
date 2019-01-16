@@ -26,6 +26,14 @@ import com.facebook.login.widget.LoginButton;
 import com.facebook.stetho.Stetho;
 import com.github.neone35.ageversary.utils.CircleTransform;
 import com.github.neone35.ageversary.utils.PrefUtils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
@@ -41,8 +49,12 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import butterknife.BindView;
@@ -53,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_BIRTH_DATE = "user_birth_date";
     private static final String KEY_USER_PICTURE = "user_picture";
+    private static final String KEY_USER_FIRESTORE_ID = "user_firestore_id";
     @BindView(R.id.iv_year_holder)
     ImageView ivYearHolder;
     @BindView(R.id.iv_share_holder)
@@ -106,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean mIsLoggedIn;
     private long mBirthMillis;
     private long mNowMillis;
+    private FirebaseFirestore mFireDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences userSharedPreferences = this.getSharedPreferences(
                 PrefUtils.PREF_FILE_NAME, Context.MODE_PRIVATE);
         mUserPrefs = PrefUtils.getInstance(userSharedPreferences);
+        mFireDb = FirebaseFirestore.getInstance();
 
         setYearProgress(saYearProgress, tvYearProgress);
         startAnimations(saYearProgress);
@@ -127,18 +142,18 @@ public class MainActivity extends AppCompatActivity {
             blinkAnim(ivProfileHolder);
             showAgeWidgets(false);
         } else {
-            // set global birthMillis
-            getUserAge(mUserPrefs.getString(KEY_USER_BIRTH_DATE));
-            // find ms interval between birth & now
-            Duration msDuration = new Duration(mBirthMillis, mNowMillis);
-            int daysAge = (int) msDuration.getStandardDays();
-            int hoursAge = (int) msDuration.getStandardHours();
-            int minsAge = (int) msDuration.getStandardMinutes();
-            setupAgeWidgets(daysAge, hoursAge, minsAge);
+            setupAgeWidgets();
         }
     }
 
-    private void setupAgeWidgets(long daysAge, long hoursAge, long minsAge) {
+    private void setupAgeWidgets() {
+        // set global birthMillis
+        getUserAge(mUserPrefs.getString(KEY_USER_BIRTH_DATE));
+        // find ms interval between birth & now
+        Duration msDuration = new Duration(mBirthMillis, mNowMillis);
+        int daysAge = (int) msDuration.getStandardDays();
+        int hoursAge = (int) msDuration.getStandardHours();
+        int minsAge = (int) msDuration.getStandardMinutes();
         setupDaysWidget(daysAge);
         setupHoursWidget(hoursAge);
         setupMinsWidget(minsAge);
@@ -315,6 +330,14 @@ public class MainActivity extends AppCompatActivity {
             LoginManager.getInstance().logOut();
             // show facebook login button
             fbLoginButton.setVisibility(View.VISIBLE);
+            // erase firestore document with saved id
+            String userName = mUserPrefs.getString(KEY_USER_NAME);
+            mFireDb.collection("users").document(userName)
+                    .delete()
+                    .addOnSuccessListener(aVoid ->
+                            Logger.d("User with name " + userName + " successfully deleted."))
+                    .addOnFailureListener(e ->
+                            Logger.d("Error deleting user with id " + userName));
             // erase & load empty user preferences
             mUserPrefs.clear();
             loadUserInfoFromPrefs();
@@ -399,7 +422,6 @@ public class MainActivity extends AppCompatActivity {
                 userName = resObj.getString("name");
                 userBirthDate = resObj.getString("birthday"); // 01/31/1980 format
                 userPhotoUrl = resObj.getJSONObject("picture").getJSONObject("data").getString("url");
-
                 // load user picture
                 loadUserPicture(userPhotoUrl);
                 // set profile name into view
@@ -407,14 +429,33 @@ public class MainActivity extends AppCompatActivity {
                 // find & set user age into view
                 String userAge = getUserAge(userBirthDate);
                 tvProfileAge.setText(userAge);
-                // save set user info to prefs file
+                // save set user info to firestore & id to prefs file
                 saveUserInfoToPrefs(userName, userBirthDate, userPhotoUrl);
+                saveUserInfoToFirestore(userName, userBirthDate, userPhotoUrl);
+                // update widgets data with from saved birth date
+                setupAgeWidgets();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else {
             ToastUtils.showShort("Failed to login. Try again");
         }
+    }
+
+    private void saveUserInfoToFirestore(String userName, String userBirthDate, String userPhotoUrl) {
+        // Create a new user
+        Map<String, Object> user = new HashMap<>();
+        user.put("username", userName);
+        user.put("birthDate", userBirthDate);
+        user.put("photoUrl", userPhotoUrl);
+
+        // Add a new document with a generated ID
+        mFireDb.collection("users")
+                .document(userName)
+                .set(user)
+                .addOnSuccessListener(documentReference ->
+                        Logger.d("DocumentSnapshot added with name: " + userName))
+                .addOnFailureListener(e -> Logger.w("Error adding document", e));
     }
 
     private String getUserAge(String userBirthDate) { // 01/31/1980 format
