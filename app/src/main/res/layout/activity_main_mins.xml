@@ -50,7 +50,7 @@
         android:textColor="@color/primaryTextColor"
         android:textSize="16sp"
         app:layout_constraintStart_toStartOf="@+id/tv_mins_current_label"
-        app:layout_constraintTop_toTopOf="@+id/tv_mins_anniversary" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tv_mins_current_label"
@@ -95,16 +95,21 @@
         android:id="@+id/tv_mins_anniversary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginRight="4dp"
         android:textColor="#000"
-        android:textSize="26sp"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="9,600,000" />
+        tools:text="96,600,000" />
 
     <TextView
         android:id="@+id/tv_mins"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginRight="4dp"
         android:textColor="@color/pinkColor"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -129,6 +134,8 @@
         android:id="@+id/tv_mins_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginRight="4dp"
         android:textColor="#000"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="@+id/tv_mins_anniv_label"

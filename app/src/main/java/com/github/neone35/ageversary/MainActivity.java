@@ -3,7 +3,12 @@ package com.github.neone35.ageversary;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.text.format.DateFormat;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -26,14 +31,7 @@ import com.facebook.login.widget.LoginButton;
 import com.facebook.stetho.Stetho;
 import com.github.neone35.ageversary.utils.CircleTransform;
 import com.github.neone35.ageversary.utils.PrefUtils;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
@@ -45,18 +43,20 @@ import org.joda.time.Period;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -114,6 +114,8 @@ public class MainActivity extends AppCompatActivity {
     TextView tvMinsPercent;
     @BindView(R.id.tv_mins_date)
     TextView tvMinsDate;
+    @BindView(R.id.cl_main)
+    ConstraintLayout clMain;
     private CallbackManager callbackManager;
     private PrefUtils mUserPrefs;
     private boolean mIsLoggedIn;
@@ -254,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
     private void setUpListeners() {
         // social profile sign in button
         ivProfileHolder.setOnClickListener(view -> fbLogInOff());
+        // login with facebook button
         fbLoginButton.setOnClickListener(v -> {
             fbLoginButton.setReadPermissions(Arrays.asList(
                     "public_profile", "email", "user_birthday", "user_friends"));
@@ -292,6 +295,76 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         });
+        // share button
+        ivShareHolder.setOnClickListener(view -> {
+            File screenshotFile = getScreenShot();
+            Uri screenshotUri = Uri.fromFile(screenshotFile);
+            Intent shareIntent = new Intent();
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Look at my age differently!");
+            shareIntent.setType("image/*");
+            startActivity(Intent.createChooser(shareIntent, "Share screenshot"));
+        });
+    }
+
+    private boolean erasePastScreenshots(File screenshotDir) {
+        File file = new File(screenshotDir.toString());
+        String[] scrFiles;
+        scrFiles = file.list();
+        // if more than one screenshot has been found, erase all
+        if (scrFiles.length > 1) {
+            for (String scrFile1 : scrFiles) {
+                File scrFile = new File(file, scrFile1);
+                scrFile.delete();
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private File getScreenShot() {
+        Date now = new Date();
+        DateFormat.format("yyyy-MM-dd_hh:mm:ss", now);
+
+        try {
+            if (isExternalStorageWritable()) {
+                File externalPicDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                if (externalPicDir != null) {
+                    boolean pastScrErased = erasePastScreenshots(externalPicDir);
+                }
+                // image naming and path to include sd card appending name
+                String mPath = externalPicDir + "/" + now + "-ageversary-screenshot.jpg";
+
+                // create bitmap screen capture
+                View v1 = getWindow().getDecorView().getRootView();
+                v1.setDrawingCacheEnabled(true);
+                Bitmap bitmap = Bitmap.createBitmap(v1.getDrawingCache());
+                v1.setDrawingCacheEnabled(false);
+
+                File imageFile = new File(mPath);
+                FileOutputStream outputStream = new FileOutputStream(imageFile);
+                int quality = 85;
+                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
+                outputStream.flush();
+                outputStream.close();
+
+                return imageFile;
+            } else {
+                ToastUtils.showShort("No external storage for screenshot found");
+                return null;
+            }
+        } catch (Throwable e) {
+            // Several error may come out with file handling or DOM
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 
     private void setUpActivity() {
@@ -429,7 +502,7 @@ public class MainActivity extends AppCompatActivity {
                 // find & set user age into view
                 String userAge = getUserAge(userBirthDate);
                 tvProfileAge.setText(userAge);
-                // save set user info to firestore & id to prefs file
+                // save set user info to prefs & firestore
                 saveUserInfoToPrefs(userName, userBirthDate, userPhotoUrl);
                 saveUserInfoToFirestore(userName, userBirthDate, userPhotoUrl);
                 // update widgets data with from saved birth date
