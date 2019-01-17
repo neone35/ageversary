@@ -28,4 +28,6 @@
     <string name="current_dimension_icon">current dimension icon</string>
     <string name="mins">mins</string>
     <string name="celebrate_life">celebrate life</string>
+    <string name="more_settings_menu_item">more settings menu item</string>
+    <string name="logout">Logout</string>
 </resources>

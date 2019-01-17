@@ -9,6 +9,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.format.DateFormat;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -139,12 +142,14 @@ public class MainActivity extends AppCompatActivity {
         startAnimations(saYearProgress);
         loadUserInfoFromPrefs();
         setUpListeners();
-        // if user is logged off & no preferences are set
-        if (!mIsLoggedIn && mUserPrefs.getString(KEY_USER_PICTURE).isEmpty()) {
+        // if no preferences are set, user is logged off
+        if (mUserPrefs.getString(KEY_USER_BIRTH_DATE).isEmpty()) {
             blinkAnim(ivProfileHolder);
             showAgeWidgets(false);
+            mIsLoggedIn = false;
         } else {
             setupAgeWidgets();
+            mIsLoggedIn = true;
         }
     }
 
@@ -275,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
                                 updateProfileUI(response);
                                 ivProfileHolder.getAnimation().cancel();
                                 showAgeWidgets(true);
+                                mIsLoggedIn = true;
                             });
                     Bundle parameters = new Bundle();
                     parameters.putString("fields", "id,name,email,gender,birthday,picture.type(large)");
@@ -378,6 +384,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.settings_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (mIsLoggedIn)
+            menu.findItem(R.id.logout).setEnabled(true);
+        else
+            menu.findItem(R.id.logout).setEnabled(false);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.logout:
+                if (mIsLoggedIn)
+                    fbLogInOff();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 //    private void generateKeyHash() {
 //        try {
 //            PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
@@ -395,7 +429,6 @@ public class MainActivity extends AppCompatActivity {
 //    }
 
     private void fbLogInOff() {
-        fbLoginButton.performClick();
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         mIsLoggedIn = accessToken != null && !accessToken.isExpired();
         Logger.d("fbLogInOff: " + mIsLoggedIn);
@@ -405,7 +438,8 @@ public class MainActivity extends AppCompatActivity {
             fbLoginButton.setVisibility(View.VISIBLE);
             // erase firestore document with saved id
             String userName = mUserPrefs.getString(KEY_USER_NAME);
-            mFireDb.collection("users").document(userName)
+            mFireDb.collection("users")
+                    .document(userName)
                     .delete()
                     .addOnSuccessListener(aVoid ->
                             Logger.d("User with name " + userName + " successfully deleted."))
@@ -417,6 +451,9 @@ public class MainActivity extends AppCompatActivity {
             // enable blinking again (logger off)
             blinkAnim(ivProfileHolder);
             showAgeWidgets(false);
+            mIsLoggedIn = false;
+        } else {
+            fbLoginButton.performClick();
         }
     }
 

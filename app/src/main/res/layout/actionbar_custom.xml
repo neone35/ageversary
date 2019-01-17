@@ -10,7 +10,7 @@
 
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/iv_app_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@mipmap/ic_launcher"
@@ -30,10 +30,10 @@
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/app_name"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView"
-        app:layout_constraintEnd_toStartOf="@+id/imageView"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_app_logo"
+        app:layout_constraintEnd_toStartOf="@+id/iv_app_logo"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/imageView"
+        app:layout_constraintTop_toTopOf="@+id/iv_app_logo"
         android:layout_marginRight="8dp" />
 
     <TextView
@@ -47,9 +47,9 @@
         android:layout_marginRight="8dp"
         android:text="@string/celebrate_life"
         android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_app_logo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="@+id/imageView" />
+        app:layout_constraintStart_toEndOf="@+id/iv_app_logo"
+        app:layout_constraintTop_toTopOf="@+id/iv_app_logo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
