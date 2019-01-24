@@ -30,4 +30,6 @@
     <string name="celebrate_life">celebrate life</string>
     <string name="more_settings_menu_item">more settings menu item</string>
     <string name="logout">Logout</string>
+    <string name="profile">My Profile</string>
+    <string name="friends">Friends</string>
 </resources>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@drawable/white_circle_border_inverse"/>
-    <item android:drawable="@drawable/icon_share_inverse" />
+    <item android:drawable="@drawable/ic_share_inverse" />
 </layer-list>

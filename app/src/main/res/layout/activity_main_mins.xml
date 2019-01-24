@@ -151,7 +151,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/tv_mins_next_at_label"
         app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_mins_next_at_label"
-        app:srcCompat="@drawable/icon_bullseye_pink" />
+        app:srcCompat="@drawable/ic_bullseye_pink" />
 
     <ImageView
         android:id="@+id/iv_mins_next"
@@ -161,7 +161,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/tv_mins_anniv_label"
         app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_mins_anniv_label"
-        app:srcCompat="@drawable/icon_next_pink" />
+        app:srcCompat="@drawable/ic_next_pink" />
 
     <ImageView
         android:id="@+id/iv_mins_time"
@@ -171,6 +171,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/tv_mins_current_label"
         app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_mins_current_label"
-        app:srcCompat="@drawable/icon_time_pink" />
+        app:srcCompat="@drawable/ic_time_pink" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

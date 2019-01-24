@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -34,6 +33,7 @@ import com.facebook.login.widget.LoginButton;
 import com.facebook.stetho.Stetho;
 import com.github.neone35.ageversary.utils.CircleTransform;
 import com.github.neone35.ageversary.utils.PrefUtils;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.Logger;
@@ -43,6 +43,7 @@ import com.triggertrap.seekarc.SeekArc;
 import org.joda.time.Duration;
 import org.joda.time.MutableDateTime;
 import org.joda.time.Period;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,6 +58,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -119,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
     TextView tvMinsDate;
     @BindView(R.id.cl_main)
     ConstraintLayout clMain;
+    @BindView(R.id.bnv_main)
+    BottomNavigationView bnvMain;
     private CallbackManager callbackManager;
     private PrefUtils mUserPrefs;
     private boolean mIsLoggedIn;
@@ -145,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         // if no preferences are set, user is logged off
         if (mUserPrefs.getString(KEY_USER_BIRTH_DATE).isEmpty()) {
             blinkAnim(ivProfileHolder);
-            showAgeWidgets(false);
+            switchAgeWidgets(false);
             mIsLoggedIn = false;
         } else {
             setupAgeWidgets();
@@ -233,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
         return Math.floor(i / v) * v;
     }
 
-    private void showAgeWidgets(boolean show) {
+    private void switchAgeWidgets(boolean show) {
 //        View incDays = findViewById(R.id.inc_days);
         if (!show) {
             svWidgets.setVisibility(View.GONE);
@@ -279,11 +283,12 @@ public class MainActivity extends AppCompatActivity {
                                 fbLoginButton.setVisibility(View.GONE);
                                 updateProfileUI(response);
                                 ivProfileHolder.getAnimation().cancel();
-                                showAgeWidgets(true);
+                                switchAgeWidgets(true);
                                 mIsLoggedIn = true;
+                                Logger.d(response);
                             });
                     Bundle parameters = new Bundle();
-                    parameters.putString("fields", "id,name,email,gender,birthday,picture.type(large)");
+                    parameters.putString("fields", "id,name,email,gender,picture.type(large),birthday,friends");
                     request.setParameters(parameters);
                     request.executeAsync();
                 }
@@ -312,6 +317,18 @@ public class MainActivity extends AppCompatActivity {
             shareIntent.setType("image/*");
             startActivity(Intent.createChooser(shareIntent, "Share screenshot"));
         });
+        // bottom navigation
+        bnvMain.setOnNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.action_profile:
+                    // do something here
+                    return true;
+                case R.id.action_friends:
+                    // do something here
+                    return true;
+            }
+            return false;
+        });
     }
 
     private boolean erasePastScreenshots(File screenshotDir) {
@@ -322,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
         if (scrFiles.length > 1) {
             for (String scrFile1 : scrFiles) {
                 File scrFile = new File(file, scrFile1);
-                scrFile.delete();
+                boolean deleted = scrFile.delete();
             }
             return true;
         } else {
@@ -450,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
             loadUserInfoFromPrefs();
             // enable blinking again (logger off)
             blinkAnim(ivProfileHolder);
-            showAgeWidgets(false);
+            switchAgeWidgets(false);
             mIsLoggedIn = false;
         } else {
             fbLoginButton.performClick();
@@ -532,6 +549,8 @@ public class MainActivity extends AppCompatActivity {
                 userName = resObj.getString("name");
                 userBirthDate = resObj.getString("birthday"); // 01/31/1980 format
                 userPhotoUrl = resObj.getJSONObject("picture").getJSONObject("data").getString("url");
+                JSONArray userFriends = resObj.getJSONObject("friends").getJSONArray("data");
+                Logger.d(userFriends);
                 // load user picture
                 loadUserPicture(userPhotoUrl);
                 // set profile name into view

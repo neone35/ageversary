@@ -150,7 +150,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/tv_hours_next_at_label"
         app:layout_constraintStart_toEndOf="@+id/sa_hours_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_hours_next_at_label"
-        app:srcCompat="@drawable/icon_bullseye_yellow" />
+        app:srcCompat="@drawable/ic_bullseye_yellow" />
 
     <ImageView
         android:id="@+id/iv_hours_next"
@@ -160,7 +160,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/tv_hours_anniv_label"
         app:layout_constraintStart_toEndOf="@+id/sa_hours_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_hours_anniv_label"
-        app:srcCompat="@drawable/icon_next_yellow" />
+        app:srcCompat="@drawable/ic_next_yellow" />
 
     <ImageView
         android:id="@+id/iv_hours_time"
@@ -170,6 +170,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/tv_hours_current_label"
         app:layout_constraintStart_toEndOf="@+id/sa_hours_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_hours_current_label"
-        app:srcCompat="@drawable/icon_time_yellow" />
+        app:srcCompat="@drawable/ic_time_yellow" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

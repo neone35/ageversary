@@ -149,7 +149,7 @@
         app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_days_next_at_label"
         android:contentDescription="@string/anniversary_icon"
-        app:srcCompat="@drawable/icon_bullseye_green" />
+        app:srcCompat="@drawable/ic_bullseye_green" />
 
     <ImageView
         android:id="@+id/iv_days_next"
@@ -159,7 +159,7 @@
         app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_days_anniv_label"
         android:contentDescription="@string/next_anniversary_date_icon"
-        app:srcCompat="@drawable/icon_next_green" />
+        app:srcCompat="@drawable/ic_next_green" />
 
     <ImageView
         android:id="@+id/iv_days_time"
@@ -169,6 +169,6 @@
         app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_days_current_label"
         android:contentDescription="@string/current_dimension_icon"
-        app:srcCompat="@drawable/icon_time_green" />
+        app:srcCompat="@drawable/ic_time_green" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
