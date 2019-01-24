@@ -43,6 +43,7 @@ dependencies {
     // pretty logger
     // binding
     implementation "com.jakewharton:butterknife:$rootProject.butterknife_v"
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha01'
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknife_v"
     // helper functions
     implementation 'com.blankj:utilcode:1.17.3'
@@ -61,6 +62,8 @@ dependencies {
 
     //other
     implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'org.parceler:parceler-api:1.1.12'
+    annotationProcessor 'org.parceler:parceler:1.1.12'
 }
 
 apply plugin: 'com.google.gms.google-services'
