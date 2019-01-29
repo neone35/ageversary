@@ -30,6 +30,8 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
     implementation "com.google.android.material:material:1.1.0-alpha02"
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha01'
+    implementation 'androidx.preference:preference:1.0.0'
     // 3RD PARTY
     // ui
     implementation 'com.github.Triggertrap:SeekArc:v1.1'
@@ -43,7 +45,6 @@ dependencies {
     // pretty logger
     // binding
     implementation "com.jakewharton:butterknife:$rootProject.butterknife_v"
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha01'
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknife_v"
     // helper functions
     implementation 'com.blankj:utilcode:1.17.3'

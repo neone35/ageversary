@@ -6,11 +6,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.facebook.CallbackManager;
 import com.facebook.stetho.Stetho;
 import com.github.neone35.ageversary.friends.FriendFragment;
 import com.github.neone35.ageversary.pojo.User;
+import com.github.neone35.ageversary.preferences.PreferencesFragment;
 import com.github.neone35.ageversary.utils.PrefUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.orhanobut.logger.AndroidLogAdapter;
@@ -30,15 +32,16 @@ public class MainActivity extends AppCompatActivity implements FriendFragment.On
     public static final String KEY_USER_NAME = "user_name";
     public static final String KEY_USER_BIRTH_DATE = "user_birth_date";
     public static final String KEY_USER_PICTURE = "user_picture";
+    public static final String KEY_USER_FRIENDS = "user_friends";
     public static final String TAG_MAIN_FRAGMENT = "main_fragment";
     public static final String TAG_FRIENDS_FRAGMENT = "friends_fragment";
     @BindView(R.id.bnv_main)
     BottomNavigationView bnvMain;
     public static PrefUtils mUserPrefs;
-    public static SharedPreferences mUserSharedPreferences;
     public static boolean mIsLoggedIn;
-    public static long mNowMillis;
-    public static ArrayList<User> mUserList;
+    public static long mLaunchMillis;
+    public static ArrayList<User> mFilteredFriendsList;
+    public static ArrayList<String> mFacebookFriendsList;
     public static CallbackManager callbackManager;
     private FragmentManager mFragmentManager;
 
@@ -47,11 +50,12 @@ public class MainActivity extends AppCompatActivity implements FriendFragment.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setUpActivity();
-        mNowMillis = System.currentTimeMillis();
+        mLaunchMillis = System.currentTimeMillis();
         SharedPreferences userSharedPreferences = this.getSharedPreferences(
                 PrefUtils.PREF_FILE_NAME, Context.MODE_PRIVATE);
         mUserPrefs = PrefUtils.getInstance(userSharedPreferences);
-        mUserList = new ArrayList<>();
+        mFilteredFriendsList = new ArrayList<>();
+        mFacebookFriendsList = new ArrayList<>();
         mFragmentManager = getSupportFragmentManager();
 
         // inflate initial fragment
@@ -69,15 +73,15 @@ public class MainActivity extends AppCompatActivity implements FriendFragment.On
                 case R.id.action_profile:
                     Fragment mainFragment = MainFragment.newInstance();
                     // replace with main fragment only when friends fragment is active
-                    if (mFragmentManager.findFragmentByTag(TAG_FRIENDS_FRAGMENT) != null)
+//                    if (mFragmentManager.findFragmentByTag(TAG_FRIENDS_FRAGMENT) != null)
                         mFragmentManager.beginTransaction()
                                 .replace(R.id.fl_main, mainFragment, TAG_MAIN_FRAGMENT)
                                 .commit();
                     return true;
                 case R.id.action_friends:
-                    Fragment friendFragment = FriendFragment.newInstance(1, mUserList);
+                    Fragment friendFragment = FriendFragment.newInstance(1, mFilteredFriendsList);
                     // replace with friends fragment only when main fragment is active
-                    if (mFragmentManager.findFragmentByTag(TAG_MAIN_FRAGMENT) != null)
+//                    if (mFragmentManager.findFragmentByTag(TAG_MAIN_FRAGMENT) != null)
                         mFragmentManager.beginTransaction()
                                 .replace(R.id.fl_main, friendFragment, TAG_FRIENDS_FRAGMENT)
                                 .commit();
@@ -112,13 +116,30 @@ public class MainActivity extends AppCompatActivity implements FriendFragment.On
         return true;
     }
 
+    // disable menu buttons if user is logged off
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (mIsLoggedIn)
+        if (mIsLoggedIn) {
             menu.findItem(R.id.logout).setEnabled(true);
-        else
+            menu.findItem(R.id.settings).setEnabled(true);
+        } else {
             menu.findItem(R.id.logout).setEnabled(false);
+            menu.findItem(R.id.settings).setEnabled(false);
+        }
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                mFragmentManager.beginTransaction()
+                        .replace(R.id.fl_main, new PreferencesFragment())
+                        .commit();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 //    private void generateKeyHash() {

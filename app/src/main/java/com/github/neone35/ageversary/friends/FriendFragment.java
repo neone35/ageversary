@@ -74,17 +74,20 @@ public class FriendFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friend_list, container, false);
 
         // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
+        if (MainActivity.mIsLoggedIn) {
+            if (view instanceof RecyclerView) {
+                Context context = view.getContext();
+                RecyclerView recyclerView = (RecyclerView) view;
+                if (mColumnCount <= 1) {
+                    recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                } else {
+                    recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
+                }
+                FriendRVAdapter friendAdapter = new FriendRVAdapter(mUserList, mListener);
+                recyclerView.setAdapter(friendAdapter);
             }
-            FriendRVAdapter friendAdapter = new FriendRVAdapter(mUserList, mListener);
-            friendAdapter.notifyDataSetChanged();
-            recyclerView.swapAdapter(friendAdapter, true);
+        } else {
+            ToastUtils.showShort("You must be logged in to see friends");
         }
         return view;
     }

@@ -12,6 +12,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import android.os.Environment;
+import android.os.Handler;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -39,11 +40,15 @@ import com.github.neone35.ageversary.pojo.User;
 import com.github.neone35.ageversary.utils.CircleTransform;
 import com.github.neone35.ageversary.utils.MathUtils;
 import com.github.neone35.ageversary.utils.PrefUtils;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.orhanobut.logger.Logger;
 import com.squareup.picasso.Picasso;
 import com.triggertrap.seekarc.SeekArc;
 
+import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.MutableDateTime;
 import org.joda.time.Period;
@@ -55,6 +60,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -143,6 +149,16 @@ public class MainFragment extends Fragment {
 //        }
     }
 
+    // load profile photo into view
+    public static void loadPicture(String pictureUrl, ImageView intoIv) {
+        Picasso.get().load(pictureUrl)
+                .placeholder(R.drawable.account_circle_holder)
+                .fit()
+                .centerCrop()
+                .transform(new CircleTransform())
+                .into(intoIv);
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -163,7 +179,15 @@ public class MainFragment extends Fragment {
         } else {
             setupAgeWidgets();
             MainActivity.mIsLoggedIn = true;
-            getAllUsers();
+            // if friends are set in prefs, pass them to setup list
+            String friendsWithComma = mUserPrefs.getString(MainActivity.KEY_USER_FRIENDS);
+            if (!friendsWithComma.isEmpty()) {
+                ArrayList<String> friendList = getFriendList(friendsWithComma);
+                // clear received saved friend list
+                MainActivity.mFacebookFriendsList.clear();
+                MainActivity.mFacebookFriendsList.addAll(friendList);
+                getAllFilteredFriends(MainActivity.mFacebookFriendsList);
+            }
         }
 
         return rootView;
@@ -200,6 +224,15 @@ public class MainFragment extends Fragment {
         sa.setAnimation(fadeIn);
     }
 
+    private ArrayList<String> getFriendList(String friendsWithComma) {
+        // split saved friends
+        Iterable<String> friendListIterator = Splitter.on(",")
+                .trimResults()
+                .omitEmptyStrings()
+                .split(friendsWithComma);
+        return Lists.newArrayList(friendListIterator);
+    }
+
     // load user info from preferences
     private void loadUserInfoFromPrefs() {
         if (mUserPrefs != null) {
@@ -215,9 +248,9 @@ public class MainFragment extends Fragment {
                 tvProfileName.setText(getString(R.string.no_name));
             }
             if (!mUserPrefs.getString(MainActivity.KEY_USER_PICTURE).isEmpty())
-                loadUserPicture(mUserPrefs.getString(MainActivity.KEY_USER_PICTURE));
+                loadPicture(mUserPrefs.getString(MainActivity.KEY_USER_PICTURE), ivProfileHolder);
             else {
-                loadUserPicture(String.valueOf(R.drawable.account_circle_holder));
+                loadPicture(String.valueOf(R.drawable.account_circle_holder), ivProfileHolder);
             }
 
             // show facebook login button only if user info is empty
@@ -234,6 +267,7 @@ public class MainFragment extends Fragment {
         ivProfileHolder.setOnClickListener(view -> fbLogInOff());
         // login with facebook button
         fbLoginButton.setOnClickListener(v -> {
+//            fbLoginButton.setFragment(this);
             fbLoginButton.setReadPermissions(Arrays.asList(
                     "public_profile", "email", "user_birthday", "user_friends"));
             MainActivity.callbackManager = CallbackManager.Factory.create();
@@ -286,35 +320,6 @@ public class MainFragment extends Fragment {
         });
     }
 
-    private void fbLogInOff() {
-        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        MainActivity.mIsLoggedIn = accessToken != null && !accessToken.isExpired();
-        Logger.d("fbLogInOff: " + MainActivity.mIsLoggedIn);
-        if (MainActivity.mIsLoggedIn) {
-            LoginManager.getInstance().logOut();
-            // show facebook login button
-            fbLoginButton.setVisibility(View.VISIBLE);
-            // erase firestore document with saved id
-            String userName = mUserPrefs.getString(MainActivity.KEY_USER_NAME);
-            mFireDb.collection("users")
-                    .document(userName)
-                    .delete()
-                    .addOnSuccessListener(aVoid ->
-                            Logger.d("User with name " + userName + " successfully deleted."))
-                    .addOnFailureListener(e ->
-                            Logger.d("Error deleting user with id " + userName));
-            // erase & load empty user preferences
-            mUserPrefs.clear();
-            loadUserInfoFromPrefs();
-            // enable blinking again (logger off)
-            blinkAnim(ivProfileHolder);
-            switchAgeWidgets(false);
-            MainActivity.mIsLoggedIn = false;
-        } else {
-            fbLoginButton.performClick();
-        }
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -327,38 +332,47 @@ public class MainFragment extends Fragment {
         }
     }
 
-    private void updateProfileUI(GraphResponse response) {
-        if (response != null) {
-            // turn off login listener
-//            ivProfileHolder.setOnClickListener(null);
-            String userName;
-            String userBirthDate;
-            String userPhotoUrl;
+    private void fbLogInOff() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        MainActivity.mIsLoggedIn = accessToken != null && !accessToken.isExpired();
+        Logger.d("fbLogInOff: " + MainActivity.mIsLoggedIn);
+        if (MainActivity.mIsLoggedIn) {
+            LoginManager.getInstance().logOut();
+            // show facebook login button
+            fbLoginButton.setVisibility(View.VISIBLE);
+            // erase firestore document with saved id
+            String userName = mUserPrefs.getString(MainActivity.KEY_USER_NAME);
+//            mFireDb.collection("users")
+//                    .document(userName)
+//                    .delete()
+//                    .addOnSuccessListener(aVoid ->
+//                            Logger.d("User with name " + userName + " successfully deleted."))
+//                    .addOnFailureListener(e ->
+//                            Logger.d("Error deleting user with id " + userName));
+            // erase & load empty user preferences
+            mUserPrefs.clear();
+            loadUserInfoFromPrefs();
+            // enable blinking again (logger off)
+            blinkAnim(ivProfileHolder);
+            switchAgeWidgets(false);
+            MainActivity.mIsLoggedIn = false;
+        } else {
+            fbLoginButton.performClick();
+        }
+    }
+
+    private String saveAllFacebookFriends(JSONArray userFriends) {
+        MainActivity.mFacebookFriendsList.clear();
+        for (int i = 0; i < userFriends.length(); i++) {
             try {
-                JSONObject resObj = response.getJSONObject();
-                userName = resObj.getString("name");
-                userBirthDate = resObj.getString("birthday"); // 01/31/1980 format
-                userPhotoUrl = resObj.getJSONObject("picture").getJSONObject("data").getString("url");
-                JSONArray userFriends = resObj.getJSONObject("friends").getJSONArray("data");
-                Logger.d(userFriends);
-                // load user picture
-                loadUserPicture(userPhotoUrl);
-                // set profile name into view
-                tvProfileName.setText(userName);
-                // find & set user age into view
-                String userAge = getUserAge(userBirthDate);
-                tvProfileAge.setText(userAge);
-                // save set user info to prefs & firestore
-                saveUserInfoToPrefs(userName, userBirthDate, userPhotoUrl);
-                saveUserInfoToFirestore(userName, userBirthDate, userPhotoUrl);
-                // update widgets data with from saved birth date
-                setupAgeWidgets();
+                MainActivity.mFacebookFriendsList.add(userFriends.getJSONObject(i).getString("name"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        } else {
-            ToastUtils.showShort("Failed to login. Try again");
         }
+        String friendsWithComma = Joiner.on(",").join(MainActivity.mFacebookFriendsList);
+        mUserPrefs.putString(MainActivity.KEY_USER_FRIENDS, friendsWithComma);
+        return friendsWithComma;
     }
 
     // save info to preferences
@@ -378,14 +392,40 @@ public class MainFragment extends Fragment {
         }
     }
 
-    // load profile photo into view
-    private void loadUserPicture(String pictureUrl) {
-        Picasso.get().load(pictureUrl)
-                .placeholder(R.drawable.account_circle_holder)
-                .fit()
-                .centerCrop()
-                .transform(new CircleTransform())
-                .into(ivProfileHolder);
+    private void updateProfileUI(GraphResponse response) {
+        if (response != null) {
+            // turn off login listener
+//            ivProfileHolder.setOnClickListener(null);
+            String userName;
+            String userBirthDate;
+            String userPhotoUrl;
+            try {
+                JSONObject resObj = response.getJSONObject();
+                userName = resObj.getString("name");
+                userBirthDate = resObj.getString("birthday"); // 01/31/1980 format
+                userPhotoUrl = resObj.getJSONObject("picture").getJSONObject("data").getString("url");
+                // load user picture
+                loadPicture(userPhotoUrl, ivProfileHolder);
+                // set profile name into view
+                tvProfileName.setText(userName);
+                // find & set user age into view
+                String userAge = getUserAge(userBirthDate);
+                tvProfileAge.setText(userAge);
+                // save set user info to prefs & firestore
+                saveUserInfoToPrefs(userName, userBirthDate, userPhotoUrl);
+                saveUserInfoToFirestore(userName, userBirthDate, userPhotoUrl);
+                // save friends into prefs
+                JSONArray userFriends = resObj.getJSONObject("friends").getJSONArray("data");
+                String friendsWithComma = saveAllFacebookFriends(userFriends);
+                getAllFilteredFriends(getFriendList(friendsWithComma));
+                // update widgets data with from saved birth date
+                setupAgeWidgets();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            ToastUtils.showShort("Failed to login. Try again");
+        }
     }
 
 
@@ -408,76 +448,123 @@ public class MainFragment extends Fragment {
     private String getUserAge(String userBirthDate) { // 01/31/1980 format
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
         mBirthMillis = TimeUtils.string2Millis(userBirthDate, dateFormat);
-        Period period = new Period(mBirthMillis, MainActivity.mNowMillis);
+        Period period = new Period(mBirthMillis, MainActivity.mLaunchMillis);
         return getString(R.string.age_holder, period.getYears(), period.getMonths(), period.getDays());
     }
 
     private void setupAgeWidgets() {
-        // set global birthMillis
+        // used for scheduling & conversion to millis
+        long MIN_DELAY = 60000;
+        long HOUR_DELAY = 3600000;
+        long DAY_DELAY = 86400000;
+
+        // set global mBirthMillis
         getUserAge(mUserPrefs.getString(MainActivity.KEY_USER_BIRTH_DATE));
         // find ms interval between birth & now
-        Duration msDuration = new Duration(mBirthMillis, MainActivity.mNowMillis);
+        // first time (initial) setup
+        Duration msDuration = new Duration(mBirthMillis, MainActivity.mLaunchMillis);
         int daysAge = (int) msDuration.getStandardDays();
         int hoursAge = (int) msDuration.getStandardHours();
         int minsAge = (int) msDuration.getStandardMinutes();
-        setupDaysWidget(daysAge);
-        setupHoursWidget(hoursAge);
-        setupMinsWidget(minsAge);
+        setupDaysWidget(daysAge, MIN_DELAY);
+        setupHoursWidget(hoursAge, HOUR_DELAY);
+        setupMinsWidget(minsAge, DAY_DELAY);
+
+        // setup handlers to update widgets every day, hour, min (live)
+        Handler handlerMins = new Handler();
+        Handler handlerHours = new Handler();
+        Handler handlerDay = new Handler();
+        // runs mins widget setup every minute
+        handlerMins.postDelayed(new Runnable() {
+            public void run() {
+                if (getActivity() == null) return;
+                // find ms interval between birth & now
+                Duration msDuration = new Duration(mBirthMillis, System.currentTimeMillis());
+                int minsAge = (int) msDuration.getStandardMinutes();
+                setupMinsWidget(minsAge, MIN_DELAY);
+                handlerMins.postDelayed(this, MIN_DELAY);
+            }
+        }, MIN_DELAY);
+        // runs hours widget setup every hour
+        handlerHours.postDelayed(new Runnable() {
+            public void run() {
+                if (getActivity() == null) return;
+                // find ms interval between birth & now
+                Duration msDuration = new Duration(mBirthMillis, System.currentTimeMillis());
+                int hoursAge = (int) msDuration.getStandardHours();
+                setupHoursWidget(hoursAge, HOUR_DELAY);
+                handlerHours.postDelayed(this, HOUR_DELAY);
+            }
+        }, HOUR_DELAY);
+        // runs days widget setup every 24h (day)
+        handlerDay.postDelayed(new Runnable() {
+            public void run() {
+                if (getActivity() == null) return;
+                // find ms interval between birth & now
+                Duration msDuration = new Duration(mBirthMillis, System.currentTimeMillis());
+                int daysAge = (int) msDuration.getStandardDays();
+                setupDaysWidget(daysAge, DAY_DELAY);
+                handlerDay.postDelayed(this, DAY_DELAY);
+            }
+        }, DAY_DELAY);
     }
 
-    private void setupMinsWidget(long minsAge) {
-        int annivEvery = 100000;
+    private void setupMinsWidget(long minsAge, long minsToMillisMultiplier) {
+        int ANNIV_EVERY = 100000;
         // set current mins age
         tvMins.setText(NumberFormat.getInstance().format(minsAge));
         // find next anniversary & how far it is
-        int nextMinsAnniv = (int) MathUtils.roundUp(minsAge, annivEvery);
+        long nextMinsAnniv = (int) MathUtils.roundUp(minsAge, ANNIV_EVERY);
         tvMinsAnniversary.setText(NumberFormat.getInstance().format(nextMinsAnniv));
-        int minsToNextAnniv = nextMinsAnniv - (int) minsAge;
+        int minsToNextAnniv = (int) nextMinsAnniv - (int) minsAge;
         // find percentage between two anniveraries
-        int percentOfMinsAnniv = 100 - (minsToNextAnniv * 100 / annivEvery);
-        tvMinsPercent.setText(getString(R.string.percent_holder, percentOfMinsAnniv));
+        int percentOfMinsAnniv = 100 - (minsToNextAnniv * 100 / ANNIV_EVERY);
+        tvMinsPercent.setText(Objects.requireNonNull(getContext())
+                .getResources().getString(R.string.percent_holder, percentOfMinsAnniv));
         saMinsAnniversary.setProgress(percentOfMinsAnniv);
         // find next anniversary date in format month.day hour:mins
-        MutableDateTime annivDateTime = new MutableDateTime(MainActivity.mNowMillis);
-        annivDateTime.addMinutes(minsToNextAnniv);
+        long annivMillis = mBirthMillis + (nextMinsAnniv * minsToMillisMultiplier);
+        DateTime annivDateTime = new DateTime(annivMillis);
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd HH:mm", Locale.getDefault());
         tvMinsDate.setText(TimeUtils.millis2String(annivDateTime.getMillis(), dateFormat));
     }
 
-    private void setupHoursWidget(long hoursAge) {
-        int annivEvery = 1000;
+    private void setupHoursWidget(long hoursAge, long hoursToMillisMultiplier) {
+        int ANNIV_EVERY = 1000;
         // set current hours age
         tvHours.setText(NumberFormat.getInstance().format(hoursAge));
         // find next anniversary & how far it is
-        int nextHoursAnniv = (int) MathUtils.roundUp(hoursAge, annivEvery);
+        long nextHoursAnniv = (int) MathUtils.roundUp(hoursAge, ANNIV_EVERY);
         tvHoursAnniversary.setText(NumberFormat.getInstance().format(nextHoursAnniv));
-        int hoursToNextAnniv = nextHoursAnniv - (int) hoursAge;
+        int hoursToNextAnniv = (int) nextHoursAnniv - (int) hoursAge;
         // find percentage between two anniveraries
-        int percentOfHoursAnniv = 100 - (hoursToNextAnniv * 100 / annivEvery);
-        tvHoursPercent.setText(getString(R.string.percent_holder, percentOfHoursAnniv));
+        int percentOfHoursAnniv = 100 - (hoursToNextAnniv * 100 / ANNIV_EVERY);
+        tvHoursPercent.setText(Objects.requireNonNull(getContext())
+                .getResources().getString(R.string.percent_holder, percentOfHoursAnniv));
         saHoursAnniversary.setProgress(percentOfHoursAnniv);
         // find next anniversary date in format month.day hour:00
-        MutableDateTime annivDateTime = new MutableDateTime(MainActivity.mNowMillis);
-        annivDateTime.addHours(hoursToNextAnniv);
+        long annivMillis = mBirthMillis + (nextHoursAnniv * hoursToMillisMultiplier);
+        DateTime annivDateTime = new DateTime(annivMillis);
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd HH:00", Locale.getDefault());
         tvHoursDate.setText(TimeUtils.millis2String(annivDateTime.getMillis(), dateFormat));
     }
 
-    private void setupDaysWidget(long daysAge) {
-        int annivEvery = 100;
+    private void setupDaysWidget(long daysAge, long daysToMillisMultiplier) {
+        int ANNIV_EVERY = 100;
         // set current days age
         tvDays.setText(NumberFormat.getInstance().format(daysAge));
         // find next anniversary & how far it is
-        int nextDaysAnniv = (int) MathUtils.roundUp(daysAge, annivEvery);
+        int nextDaysAnniv = (int) MathUtils.roundUp(daysAge, ANNIV_EVERY);
         tvDaysAnniversary.setText(NumberFormat.getInstance().format(nextDaysAnniv));
         int daysToNextAnniv = nextDaysAnniv - (int) daysAge;
         // find percentage between two anniveraries
-        int percentOfDayAnniv = annivEvery - daysToNextAnniv;
-        tvDaysPercent.setText(getString(R.string.percent_holder, percentOfDayAnniv));
+        int percentOfDayAnniv = ANNIV_EVERY - daysToNextAnniv;
+        tvDaysPercent.setText(Objects.requireNonNull(getContext())
+                .getResources().getString(R.string.percent_holder, percentOfDayAnniv));
         saDaysAnniversary.setProgress(percentOfDayAnniv);
         // find next anniversary date in format month.day
-        MutableDateTime annivDateTime = new MutableDateTime(MainActivity.mNowMillis);
-        annivDateTime.addDays(daysToNextAnniv);
+        long annivMillis = mBirthMillis + (nextDaysAnniv * daysToMillisMultiplier);
+        DateTime annivDateTime = new DateTime(annivMillis);
         SimpleDateFormat dateFormat = new SimpleDateFormat("MM.dd", Locale.getDefault());
         tvDaysDate.setText(TimeUtils.millis2String(annivDateTime.getMillis(), dateFormat));
     }
@@ -550,21 +637,27 @@ public class MainFragment extends Fragment {
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    private void getAllUsers() {
-        mFireDb.collection("users")
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Logger.d("Error getting documents: ", task.getException());
-                    }
-                })
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<User> users = queryDocumentSnapshots.toObjects(User.class);
-                    MainActivity.mUserList.clear();
-                    MainActivity.mUserList.addAll(users);
-                    Logger.d(MainActivity.mUserList);
-                })
-                .addOnFailureListener(e -> Logger.e(e.getMessage()));
+    private void getAllFilteredFriends(ArrayList<String> facebookFriendsList) {
+        MainActivity.mFilteredFriendsList.clear();
+        int friendNum = facebookFriendsList.size();
+        Logger.d(facebookFriendsList);
+        for (int i = 0; i < friendNum; i++) {
+            String oneFriend = facebookFriendsList.get(i);
+            mFireDb.collection("users")
+                    // get only data of facebook friend from firebase
+                    .whereEqualTo("username", oneFriend)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (!task.isSuccessful()) {
+                            Logger.d("Error getting documents: ", task.getException());
+                        }
+                    })
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        List<User> users = queryDocumentSnapshots.toObjects(User.class);
+                        MainActivity.mFilteredFriendsList.addAll(users);
+                    })
+                    .addOnFailureListener(e -> Logger.e(e.getMessage()));
+        }
     }
 
     private void blinkAnim(View view) {

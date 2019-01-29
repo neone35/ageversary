@@ -3,8 +3,10 @@ package com.github.neone35.ageversary.friends;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.neone35.ageversary.MainFragment;
 import com.github.neone35.ageversary.R;
 import com.github.neone35.ageversary.pojo.User;
 import com.github.neone35.ageversary.friends.FriendFragment.OnListFragmentInteractionListener;
@@ -30,15 +32,19 @@ public class FriendRVAdapter extends RecyclerView.Adapter<FriendRVAdapter.ViewHo
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_friend, parent, false);
+                .inflate(R.layout.fragment_friend_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         holder.mItem = mUsers.get(position);
-        holder.tvUsername.setText(mUsers.get(position).getUsername());
-        holder.tvBirthdate.setText(mUsers.get(position).getBirthDate());
+
+        User user = holder.mItem = mUsers.get(position);
+
+        holder.tvUsername.setText(user.getUsername());
+        holder.tvBirthdate.setText(user.getBirthDate());
+        MainFragment.loadPicture(user.getPhotoUrl(), holder.ivProfile);
 
         holder.mView.setOnClickListener(v -> {
             if (null != mListener) {
@@ -60,6 +66,8 @@ public class FriendRVAdapter extends RecyclerView.Adapter<FriendRVAdapter.ViewHo
         TextView tvUsername;
         @BindView(R.id.tv_birthdate)
         TextView tvBirthdate;
+        @BindView(R.id.iv_profile)
+        ImageView ivProfile;
         User mItem;
 
         ViewHolder(View view) {

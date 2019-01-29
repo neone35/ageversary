@@ -5,7 +5,5 @@
     android:name="com.github.neone35.ageversary.FriendFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
     tools:context=".friends.FriendFragment"
-    tools:listitem="@layout/fragment_friend" />
+    tools:listitem="@layout/fragment_friend_item" />

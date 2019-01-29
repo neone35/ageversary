@@ -144,24 +144,24 @@
         tools:text="01.18 10:15" />
 
     <ImageView
-        android:id="@+id/iv_mins_bullseye"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/anniversary_icon"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_mins_next_at_label"
-        app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
-        app:layout_constraintTop_toTopOf="@+id/tv_mins_next_at_label"
-        app:srcCompat="@drawable/ic_bullseye_pink" />
-
-    <ImageView
         android:id="@+id/iv_mins_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/next_anniversary_date_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_mins_next_at_label"
+        app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
+        app:layout_constraintTop_toTopOf="@+id/tv_mins_next_at_label"
+        app:srcCompat="@drawable/ic_next_pink" />
+
+    <ImageView
+        android:id="@+id/iv_mins_bullseye"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/anniversary_icon"
         app:layout_constraintBottom_toBottomOf="@+id/tv_mins_anniv_label"
         app:layout_constraintStart_toEndOf="@+id/sa_mins_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_mins_anniv_label"
-        app:srcCompat="@drawable/ic_next_pink" />
+        app:srcCompat="@drawable/ic_bullseye_pink" />
 
     <ImageView
         android:id="@+id/iv_mins_time"

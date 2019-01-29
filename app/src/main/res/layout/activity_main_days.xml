@@ -142,24 +142,24 @@
         tools:text="12.18" />
 
     <ImageView
-        android:id="@+id/iv_days_bullseye"
+        android:id="@+id/iv_days_next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/tv_days_next_at_label"
         app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_days_next_at_label"
-        android:contentDescription="@string/anniversary_icon"
-        app:srcCompat="@drawable/ic_bullseye_green" />
+        android:contentDescription="@string/next_anniversary_date_icon"
+        app:srcCompat="@drawable/ic_next_green" />
 
     <ImageView
-        android:id="@+id/iv_days_next"
+        android:id="@+id/iv_days_bullseye"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="@+id/tv_days_anniv_label"
         app:layout_constraintStart_toEndOf="@+id/sa_days_anniversary"
         app:layout_constraintTop_toTopOf="@+id/tv_days_anniv_label"
-        android:contentDescription="@string/next_anniversary_date_icon"
-        app:srcCompat="@drawable/ic_next_green" />
+        android:contentDescription="@string/anniversary_icon"
+        app:srcCompat="@drawable/ic_bullseye_green" />
 
     <ImageView
         android:id="@+id/iv_days_time"
